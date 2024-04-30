@@ -24,11 +24,11 @@ for (i, j) in posicoes:
 start_time = time.time()
 
 # Encontrando os limites da "imagem" de números 1
-x_coords = [i for (i, j) in posicoes]
-y_coords = [j for (i, j) in posicoes]
+x = [i for (i, j) in posicoes]
+y = [j for (i, j) in posicoes]
 
-min_x, max_x = min(x_coords), max(x_coords)
-min_y, max_y = min(y_coords), max(y_coords)
+min_x, max_x = min(x), max(x)
+min_y, max_y = min(y), max(y)
 
 # Calculando a largura e a altura do retângulo
 largura = max_x - min_x + 1
