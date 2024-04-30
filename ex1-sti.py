@@ -12,6 +12,7 @@ while i < 4:
 print(f"\n{matriz}\n")
 
 for linha in range(len(matriz)):
+    print(linha)
     if np.array_equal(matriz[linha], lista):
         print("Jogador venceu!")
         exit()
