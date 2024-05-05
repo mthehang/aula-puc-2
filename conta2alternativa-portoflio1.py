@@ -38,4 +38,4 @@ def encontrar_limites(matrz):
 diamin = encontrar_limites(matriz)
 raio = diamin / 2
 area = math.pi * (raio ** 2)
-print("A área da matriz é:", area, "pixels.")
+print("A área da matriz é: ", area, "pixels.")
