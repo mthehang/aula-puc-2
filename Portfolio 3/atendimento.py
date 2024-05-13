@@ -33,6 +33,25 @@ class Atendimento:
                         f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, Data: {atendimento[2]}, CID-10: {atendimento[3]}")
 
     @staticmethod
+    def atualizar(id_atend):
+        bd = BancoDeDados()
+        with bd.obter_conexao() as conexao:
+            with conexao.cursor() as cursor:
+                novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
+                if novo_cid_10:
+                    cursor.execute("SELECT CAT FROM CID10 WHERE CAT = %s;", (novo_cid_10,))
+                    if cursor.fetchone() is None:
+                        print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
+                        return
+                    cursor.execute("""
+                            UPDATE Atendimento SET
+                            CID_10 = %s
+                            WHERE ID_atend = %s;
+                        """, (novo_cid_10, id_atend))
+                conexao.commit()
+                print(f"Atendimento {id_atend} atualizado com sucesso.")
+
+    @staticmethod
     def deletar(id_atend):
         bd = BancoDeDados()
         with bd.obter_conexao() as conexao:

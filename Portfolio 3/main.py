@@ -16,9 +16,10 @@ def main_menu():
         print("7. Ver quantidade de atendimentos para um CID-10")
         print("8. Ver idade média dos pacientes")
         print("9. Atualizar um cadastro de paciente")
-        print("10. Deletar um cadastro de paciente")
-        print("11. Deletar um atendimento")
-        print("12. Sair")
+        print("10. Atualizar um cadastro de atendimento")
+        print("11. Deletar um cadastro de paciente")
+        print("12. Deletar um atendimento")
+        print("13. Sair")
         opcao = input("Escolha uma opção: ")
 
         if opcao == '1':
@@ -26,8 +27,18 @@ def main_menu():
             nome = input("Nome: ").title()
             sexo = input("Sexo (M/F): ").upper()
             data_nasc = input("Data de nascimento (AAAA-MM-DD): ")
-            peso = float(input("Peso (kg): "))
-            altura = float(input("Altura (m): "))
+            peso = None
+            while peso is None:
+                try:
+                    peso = float(input("Peso (kg): ").replace(',', '.'))
+                except ValueError:
+                    print("Valor inválido. Por favor, insira um número válido para o peso.")
+            altura = None
+            while altura is None:
+                try:
+                    altura = float(input("Altura (m): ").replace(',', '.'))
+                except ValueError:
+                    print("Valor inválido. Por favor, insira um número válido para a altura.")
             paciente = Paciente(rg, nome, sexo, data_nasc, peso, altura)
             paciente.salvar()
         elif opcao == '2':
@@ -53,12 +64,15 @@ def main_menu():
             id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: "))
             Paciente.atualizar(id_paciente)
         elif opcao == '10':
+            id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: "))
+            Atendimento.atualizar(id_atend)
+        elif opcao == '11':
             id_paciente = int(input("\nDigite o ID do paciente a ser deletado: "))
             Paciente.deletar(id_paciente)
-        elif opcao == '11':
+        elif opcao == '12':
             id_atend = int(input("\nDigite o ID do atendimento a ser deletado: "))
             Atendimento.deletar(id_atend)
-        elif opcao == '12':
+        elif opcao == '13':
             print("Saindo...")
             break
         else:
