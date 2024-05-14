@@ -51,7 +51,7 @@ class Paciente:
                     f"Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
 
                 novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title() or dados_atuais[0]
-                novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip().title() or dados_atuais[1]
+                novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip() or dados_atuais[1]
                 novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper() or dados_atuais[2]
                 nova_data_nasc = input(
                     "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip() or dados_atuais[3]
