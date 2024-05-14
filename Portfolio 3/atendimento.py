@@ -26,6 +26,21 @@ class Atendimento:
             print(f"Erro ao salvar atendimento: {e}")
 
     @staticmethod
+    def listar_todos():
+        bd = BancoDeDados()
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT ID_atend, ID_paciente, Data_atend, CID_10 FROM Atendimento ORDER BY ID_atend;")
+                    atendimentos = cursor.fetchall()
+                    for atendimento in atendimentos:
+                        print(
+                            f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, Data: {atendimento[2]}, CID-10: {atendimento[3]}")
+        except DatabaseError as e:
+            print(f"Erro ao listar atendimentos: {e}")
+
+    @staticmethod
     def atualizar(id_atend):
         bd = BancoDeDados()
         try:

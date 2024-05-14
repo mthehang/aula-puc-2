@@ -52,7 +52,8 @@ class Paciente:
                         return
 
                     print(
-                        f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, Data de Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
+                        f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, "
+                        f"Data de Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
 
                     novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title() or dados_atuais[
                         0]
@@ -63,17 +64,31 @@ class Paciente:
                         "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip() or \
                                      dados_atuais[3]
 
-                    try:
-                        novo_peso = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',',
-                                                                                                                '.')
-                        novo_peso = float(novo_peso) if novo_peso else dados_atuais[4]
+                    novo_peso = None
+                    while novo_peso is None:
+                        peso_input = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',',
+                                                                                                                 '.')
+                        if not peso_input:
+                            novo_peso = dados_atuais[4]
+                        else:
+                            try:
+                                novo_peso = float(peso_input)
+                            except ValueError:
+                                print("Valor inválido. Por favor, insira um número válido para o peso.")
+                                continue
 
-                        nova_altura = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(',',
-                                                                                                                   '.')
-                        nova_altura = float(nova_altura) if nova_altura else dados_atuais[5]
-                    except ValueError:
-                        print("Valor inválido. Por favor, insira um número válido.")
-                        return
+                    nova_altura = None
+                    while nova_altura is None:
+                        altura_input = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(',',
+                                                                                                                    '.')
+                        if not altura_input:
+                            nova_altura = dados_atuais[5]
+                        else:
+                            try:
+                                nova_altura = float(altura_input)
+                            except ValueError:
+                                print("Valor inválido. Por favor, insira um número válido para a altura.")
+                                continue
 
                     cursor.execute("""
                                 UPDATE Paciente SET
