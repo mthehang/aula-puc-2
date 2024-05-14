@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2._psycopg import OperationalError
 
 
 class BancoDeDados:
@@ -11,7 +12,11 @@ class BancoDeDados:
         }
 
     def obter_conexao(self):
-        return psycopg2.connect(**self.parametros_conexao)
+        try:
+            return psycopg2.connect(**self.parametros_conexao)
+        except OperationalError as e:
+            print("Não foi possível conectar ao banco de dados:", e)
+            return None
 
     def criar_tabelas(self):
         with self.obter_conexao() as conexao:

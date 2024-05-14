@@ -1,3 +1,6 @@
+from psycopg2 import IntegrityError
+from psycopg2._psycopg import DatabaseError
+
 from dao import BancoDeDados
 
 
@@ -37,66 +40,67 @@ class Paciente:
     @staticmethod
     def atualizar(id_paciente):
         bd = BancoDeDados()
-        with bd.obter_conexao() as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute("SELECT Nome, RG, Sexo, Data_nasc, Peso, Altura FROM Paciente WHERE ID_paciente = %s;",
-                               (id_paciente,))
-                dados_atuais = cursor.fetchone()
-                if not dados_atuais:
-                    print("Paciente não encontrado!")
-                    return
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT Nome, RG, Sexo, Data_nasc, Peso, Altura FROM Paciente WHERE ID_paciente = %s;",
+                        (id_paciente,))
+                    dados_atuais = cursor.fetchone()
+                    if not dados_atuais:
+                        print("Paciente não encontrado!")
+                        return
 
-                print(
-                    f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, Data de "
-                    f"Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
+                    print(
+                        f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, Data de Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
 
-                novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title() or dados_atuais[0]
-                novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip() or dados_atuais[1]
-                novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper() or dados_atuais[2]
-                nova_data_nasc = input(
-                    "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip() or dados_atuais[3]
+                    novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title() or dados_atuais[
+                        0]
+                    novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip() or dados_atuais[1]
+                    novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper() or \
+                                dados_atuais[2]
+                    nova_data_nasc = input(
+                        "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip() or \
+                                     dados_atuais[3]
 
-                novo_peso = None
-                while novo_peso is None:
-                    peso_input = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',', '.')
-                    if not peso_input:
-                        novo_peso = dados_atuais[4]
-                    else:
-                        try:
-                            novo_peso = float(peso_input)
-                        except ValueError:
-                            print("Valor inválido. Por favor, insira um número válido para o peso.")
-
-                nova_altura = None
-                while nova_altura is None:
-                    altura_input = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(',',
+                    try:
+                        novo_peso = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',',
                                                                                                                 '.')
-                    if not altura_input:
-                        nova_altura = dados_atuais[5]
-                    else:
-                        try:
-                            nova_altura = float(altura_input)
-                        except ValueError:
-                            print("Valor inválido. Por favor, insira um número válido para a altura.")
+                        novo_peso = float(novo_peso) if novo_peso else dados_atuais[4]
 
-                cursor.execute("""
-                        UPDATE Paciente SET
-                        Nome = %s,
-                        RG = %s,
-                        Sexo = %s,
-                        Data_nasc = %s,
-                        Peso = %s,
-                        Altura = %s
-                        WHERE ID_paciente = %s;
-                    """, (novo_nome, novo_rg, novo_sexo, nova_data_nasc, novo_peso, nova_altura, id_paciente))
-                conexao.commit()
-                print(f"Cadastro do paciente {id_paciente} atualizado com sucesso.")
+                        nova_altura = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(',',
+                                                                                                                   '.')
+                        nova_altura = float(nova_altura) if nova_altura else dados_atuais[5]
+                    except ValueError:
+                        print("Valor inválido. Por favor, insira um número válido.")
+                        return
+
+                    cursor.execute("""
+                                UPDATE Paciente SET
+                                Nome = %s,
+                                RG = %s,
+                                Sexo = %s,
+                                Data_nasc = %s,
+                                Peso = %s,
+                                Altura = %s
+                                WHERE ID_paciente = %s;
+                            """, (novo_nome, novo_rg, novo_sexo, nova_data_nasc, novo_peso, nova_altura, id_paciente))
+                    conexao.commit()
+                    print(f"Cadastro do paciente {id_paciente} atualizado com sucesso.")
+        except (DatabaseError, IntegrityError) as e:
+            print(f"Erro ao atualizar dados: {e}")
 
     @staticmethod
     def deletar(id_paciente):
         bd = BancoDeDados()
-        with bd.obter_conexao() as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute("DELETE FROM Paciente WHERE ID_paciente = %s;", (id_paciente,))
-                conexao.commit()
-                print(f"\nPaciente {id_paciente} deletado com sucesso.")
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("DELETE FROM Paciente WHERE ID_paciente = %s;", (id_paciente,))
+                    if cursor.rowcount == 0:
+                        print("Nenhum paciente encontrado para deletar.")
+                    else:
+                        conexao.commit()
+                        print(f"\nPaciente {id_paciente} deletado com sucesso.")
+        except DatabaseError as e:
+            print(f"Erro ao deletar paciente: {e}")
