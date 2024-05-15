@@ -91,6 +91,7 @@ class Paciente:
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar dados: {e}")
 
+    # função de remover paciente foi retirada para não remover um atendimento junto.
     '''
     @staticmethod
     def deletar(id_paciente):
