@@ -21,6 +21,7 @@ class BancoDeDados:
     def criar_tabelas(self):
         with self.obter_conexao() as conexao:
             with conexao.cursor() as cursor:
+
                 cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Paciente (
                 ID_paciente SERIAL PRIMARY KEY,
@@ -31,6 +32,7 @@ class BancoDeDados:
                 Peso INT,
                 Altura FLOAT
                 );""")
+
                 cursor.execute("""
                 CREATE TABLE IF NOT EXISTS Atendimento (
                 ID_atend SERIAL PRIMARY KEY,
@@ -38,11 +40,13 @@ class BancoDeDados:
                 Data_atend TIMESTAMP,
                 CID_10 VARCHAR(10)
                 );""")
+
                 cursor.execute("""
                 CREATE TABLE IF NOT EXISTS CID10 (
                     CAT VARCHAR(10) PRIMARY KEY,
                     DESCR VARCHAR(255)
                 );""")
+
                 conexao.commit()
 
 

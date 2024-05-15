@@ -17,15 +17,14 @@ def main_menu():
         print("8. Ver idade média dos pacientes")
         print("9. Atualizar um cadastro de paciente")
         print("10. Atualizar um cadastro de atendimento")
-        print("11. Deletar um cadastro de paciente")
-        print("12. Deletar um atendimento")
-        print("13. Sair")
+        print("11. Deletar um atendimento")
+        print("00. Sair")
         opcao = input("Escolha uma opção: ")
 
         match opcao:
             case '1':
-                rg = input("RG: ")
                 nome = input("Nome: ").title()
+                rg = input("RG: ")
                 sexo = input("Sexo (M/F): ").upper()
                 data_nasc = input("Data de nascimento (AAAA-MM-DD): ")
                 peso = float(input("Peso (kg): ").replace(',', '.'))
@@ -58,14 +57,11 @@ def main_menu():
                 id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: "))
                 Atendimento.atualizar(id_atend)
             case '11':
-                id_paciente = int(input("\nDigite o ID do paciente a ser deletado: "))
-                Paciente.deletar(id_paciente)
-            case '12':
                 id_atend = int(input("\nDigite o ID do atendimento a ser deletado: "))
                 Atendimento.deletar(id_atend)
-            case '13':
+            case '00':
                 print("Saindo...")
-                break
+                exit()
             case _:
                 print("\nOpção inválida. Tente novamente.")
 

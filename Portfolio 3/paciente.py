@@ -91,6 +91,7 @@ class Paciente:
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar dados: {e}")
 
+    '''
     @staticmethod
     def deletar(id_paciente):
         bd = BancoDeDados()
@@ -99,3 +100,4 @@ class Paciente:
                 cursor.execute("DELETE FROM Paciente WHERE ID_paciente = %s;", (id_paciente,))
                 conexao.commit()
                 print(f"\nPaciente {id_paciente} deletado com sucesso.")
+    '''
