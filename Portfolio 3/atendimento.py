@@ -1,6 +1,6 @@
-from dao import BancoDeDados
 from datetime import datetime
 from psycopg2 import DatabaseError, IntegrityError
+from dao import BancoDeDados
 
 bd = BancoDeDados()
 

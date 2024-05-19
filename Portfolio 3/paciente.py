@@ -1,4 +1,4 @@
-from psycopg2._psycopg import DatabaseError, IntegrityError
+from psycopg2 import DatabaseError, IntegrityError
 from dao import BancoDeDados
 
 bd = BancoDeDados()
