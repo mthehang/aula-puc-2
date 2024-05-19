@@ -66,3 +66,4 @@ class Atendimento:
                     print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar atendimento: {e}")
+
