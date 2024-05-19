@@ -1,7 +1,5 @@
 from paciente import Paciente
 from atendimento import Atendimento
-from queries import contar_pacientes_por_sexo, contar_atendimentos_por_paciente, contar_atendimentos_por_cid, \
-    calcular_media_idade_pacientes
 
 
 def main_menu():
@@ -23,8 +21,8 @@ def main_menu():
 
         match opcao:
             case '1':
+                nome = input("\nNome: ").title()
                 rg = input("RG: ")
-                nome = input("Nome: ").title()
                 sexo = input("Sexo (M/F): ").upper()
                 data_nasc = input("Data de nascimento (AAAA-MM-DD): ")
                 peso = float(input("Peso (kg): ").replace(',', '.'))
@@ -32,7 +30,7 @@ def main_menu():
                 paciente = Paciente(rg, nome, sexo, data_nasc, peso, altura)
                 paciente.salvar()
             case '2':
-                id_paciente = int(input("ID do paciente: "))
+                id_paciente = int(input("\nID do paciente: "))
                 cid_10 = input("CID-10 do atendimento: ").upper()
                 atendimento = Atendimento(id_paciente, cid_10)
                 atendimento.salvar()
@@ -40,16 +38,19 @@ def main_menu():
                 Paciente.listar_todos()
             case '4':
                 Atendimento.listar_todos()
+            case '5':
+                data = input("\nDigite a data que deseja pesquisar atendimentos (AAAA-MM-DD): ")
+                Atendimento.listar_data(data)
             case '6':
-                print("\nQuantidade de pacientes por sexo:", contar_pacientes_por_sexo())
+                print("\nQuantidade de pacientes por sexo:", Paciente.contar_sexo())
             case '7':
                 id_paciente = int(input("\nDigite o ID do paciente: "))
-                print("Quantidade de atendimentos para o paciente:", contar_atendimentos_por_paciente(id_paciente))
+                print("Quantidade de atendimentos para o paciente:", Atendimento.contar_por_paciente(id_paciente))
             case '8':
                 cid = input("\nDigite o CID-10: ").upper()
-                print("Quantidade de atendimentos para CID-10:", contar_atendimentos_por_cid(cid))
+                print("Quantidade de atendimentos para CID-10:", Atendimento.contar_por_cid(cid))
             case '9':
-                print("\nIdade média dos pacientes:", calcular_media_idade_pacientes())
+                print("\nIdade média dos pacientes:", Paciente.media_idade())
             case '10':
                 id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: "))
                 Paciente.atualizar(id_paciente)

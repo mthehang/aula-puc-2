@@ -1,13 +1,14 @@
 import pandas as pd
 from dao import BancoDeDados
 
+bd = BancoDeDados()
+
 
 def ler_excel_para_df(caminho_arquivo):
     return pd.read_excel(caminho_arquivo, engine='openpyxl')
 
 
 def inserir_dados(df, nome_tabela):
-    bd = BancoDeDados()
     with bd.obter_conexao() as conexao:
         with conexao.cursor() as cursor:
             for _, linha in df.iterrows():

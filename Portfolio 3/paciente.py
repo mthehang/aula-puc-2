@@ -1,6 +1,7 @@
 from psycopg2._psycopg import DatabaseError, IntegrityError
-
 from dao import BancoDeDados
+
+bd = BancoDeDados()
 
 
 class Paciente:
@@ -14,7 +15,6 @@ class Paciente:
         self.altura = altura
 
     def salvar(self):
-        bd = BancoDeDados()
         with bd.obter_conexao() as conexao:
             with conexao.cursor() as cursor:
                 cursor.execute("""
@@ -26,11 +26,10 @@ class Paciente:
 
     @staticmethod
     def listar_todos():
-        bd = BancoDeDados()
         with bd.obter_conexao() as conexao:
             with conexao.cursor() as cursor:
                 cursor.execute("""
-                    SELECT ID_paciente, RG, Nome, Sexo, Data_nasc, Peso, Altura 
+                    SELECT ID_paciente, Nome, RG, Sexo, Data_nasc, Peso, Altura 
                     FROM Paciente 
                     ORDER BY ID_paciente;
                 """)
@@ -42,7 +41,6 @@ class Paciente:
 
     @staticmethod
     def atualizar(id_paciente):
-        bd = BancoDeDados()
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
@@ -90,3 +88,29 @@ class Paciente:
             print("Valor inválido. Por favor, insira um número válido para peso ou altura.")
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar dados: {e}")
+
+    @staticmethod
+    def contar_sexo():
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("SELECT Sexo, COUNT(*) FROM Paciente GROUP BY Sexo;")
+                    resultados = cursor.fetchall()
+            return resultados
+        except DatabaseError as e:
+            print(f"Erro ao acessar dados do banco: {e}")
+            return []
+
+
+    @staticmethod
+    def media_idade():
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("SELECT AVG(EXTRACT(YEAR FROM AGE(Data_nasc))) FROM Paciente;")
+                    resultado = cursor.fetchone()
+            return round(resultado[0], 1) if resultado else None
+        except DatabaseError as e:
+            print(f"Erro ao acessar dados do banco: {e}")
+            return None
+        
