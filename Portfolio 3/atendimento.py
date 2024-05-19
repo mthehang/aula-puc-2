@@ -66,18 +66,3 @@ class Atendimento:
                     print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar atendimento: {e}")
-
-    @staticmethod
-    def deletar(id_atend):
-        bd = BancoDeDados()
-        try:
-            with bd.obter_conexao() as conexao:
-                with conexao.cursor() as cursor:
-                    cursor.execute("DELETE FROM Atendimento WHERE ID_atend = %s;", (id_atend,))
-                    if cursor.rowcount == 0:
-                        print("Nenhum atendimento encontrado para deletar.")
-                    else:
-                        conexao.commit()
-                        print(f"\nAtendimento {id_atend} deletado com sucesso.")
-        except DatabaseError as e:
-            print(f"Erro ao deletar atendimento: {e}")

@@ -90,12 +90,3 @@ class Paciente:
             print("Valor inválido. Por favor, insira um número válido para peso ou altura.")
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar dados: {e}")
-
-    @staticmethod
-    def deletar(id_paciente):
-        bd = BancoDeDados()
-        with bd.obter_conexao() as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute("DELETE FROM Paciente WHERE ID_paciente = %s;", (id_paciente,))
-                conexao.commit()
-                print(f"\nPaciente {id_paciente} deletado com sucesso.")

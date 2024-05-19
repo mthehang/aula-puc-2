@@ -11,15 +11,14 @@ def main_menu():
         print("2. Adicionar um novo atendimento")
         print("3. Ver todos os pacientes")
         print("4. Ver todos os atendimentos")
-        print("5. Ver quantidade de pacientes por sexo")
-        print("6. Ver quantidade de atendimentos para um paciente")
-        print("7. Ver quantidade de atendimentos para um CID-10")
-        print("8. Ver idade média dos pacientes")
-        print("9. Atualizar um cadastro de paciente")
-        print("10. Atualizar um cadastro de atendimento")
-        print("11. Deletar um cadastro de paciente")
-        print("12. Deletar um atendimento")
-        print("13. Sair")
+        print("5. Ver atendimentos por data")
+        print("6. Ver quantidade de pacientes por sexo")
+        print("7. Ver quantidade de atendimentos para um paciente")
+        print("8. Ver quantidade de atendimentos para um CID-10")
+        print("9. Ver idade média dos pacientes")
+        print("10. Atualizar um cadastro de paciente")
+        print("11. Atualizar um cadastro de atendimento")
+        print("00. Sair")
         opcao = input("Escolha uma opção: ")
 
         match opcao:
@@ -41,29 +40,23 @@ def main_menu():
                 Paciente.listar_todos()
             case '4':
                 Atendimento.listar_todos()
-            case '5':
-                print("\nQuantidade de pacientes por sexo:", contar_pacientes_por_sexo())
             case '6':
+                print("\nQuantidade de pacientes por sexo:", contar_pacientes_por_sexo())
+            case '7':
                 id_paciente = int(input("\nDigite o ID do paciente: "))
                 print("Quantidade de atendimentos para o paciente:", contar_atendimentos_por_paciente(id_paciente))
-            case '7':
+            case '8':
                 cid = input("\nDigite o CID-10: ").upper()
                 print("Quantidade de atendimentos para CID-10:", contar_atendimentos_por_cid(cid))
-            case '8':
-                print("\nIdade média dos pacientes:", calcular_media_idade_pacientes())
             case '9':
+                print("\nIdade média dos pacientes:", calcular_media_idade_pacientes())
+            case '10':
                 id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: "))
                 Paciente.atualizar(id_paciente)
-            case '10':
+            case '11':
                 id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: "))
                 Atendimento.atualizar(id_atend)
-            case '11':
-                id_paciente = int(input("\nDigite o ID do paciente a ser deletado: "))
-                Paciente.deletar(id_paciente)
-            case '12':
-                id_atend = int(input("\nDigite o ID do atendimento a ser deletado: "))
-                Atendimento.deletar(id_atend)
-            case '13':
+            case '00':
                 print("Saindo...")
                 break
             case _:
