@@ -74,20 +74,20 @@ class Atendimento:
                     if not cid_atual:
                         print("Atendimento não encontrado!")
                         return
-
-                    print(f"CID-10 atual: {cid_atual[0]}")
-                    novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
-                    if novo_cid_10:
-                        cursor.execute("""SELECT CAT FROM CID10 WHERE CAT = %s;""", (novo_cid_10,))
-                        if cursor.fetchone() is None:
-                            print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
-                            return
-                    if not novo_cid_10:
-                        novo_cid_10 = cid_atual[0]
-                    cursor.execute("""UPDATE Atendimento SET CID_10 = %s WHERE ID_atend = %s;""",
-                                   (novo_cid_10, id_atend))
-                    conexao.commit()
-                    print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
+                    else:
+                        print(f"CID-10 atual: {cid_atual[0]}")
+                        novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
+                        if novo_cid_10:
+                            cursor.execute("""SELECT CAT FROM CID10 WHERE CAT = %s;""", (novo_cid_10,))
+                            if cursor.fetchone() is None:
+                                print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
+                                return
+                        if not novo_cid_10:
+                            novo_cid_10 = cid_atual[0]
+                        cursor.execute("""UPDATE Atendimento SET CID_10 = %s WHERE ID_atend = %s;""",
+                                       (novo_cid_10, id_atend))
+                        conexao.commit()
+                        print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
         except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao atualizar atendimento: {e}")
 
