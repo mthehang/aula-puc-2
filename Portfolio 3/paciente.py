@@ -42,7 +42,7 @@ class Paciente:
     @staticmethod
     def atualizar(id_paciente):
         try:
-            with bd.obter_conexao() as conexao:
+            with (bd.obter_conexao() as conexao):
                 with conexao.cursor() as cursor:
                     cursor.execute(
                         "SELECT Nome, RG, Sexo, Data_nasc, Peso, Altura FROM Paciente WHERE ID_paciente = %s;",
@@ -53,7 +53,8 @@ class Paciente:
                         return
 
                     print(
-                        f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, Data de Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
+                        f"Dados Atuais — Nome: {dados_atuais[0]}, RG: {dados_atuais[1]}, Sexo: {dados_atuais[2]}, "
+                        f"Data de Nascimento: {dados_atuais[3]}, Peso: {dados_atuais[4]}, Altura: {dados_atuais[5]}")
 
                     novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title() or dados_atuais[
                         0]
@@ -101,7 +102,6 @@ class Paciente:
             print(f"Erro ao acessar dados do banco: {e}")
             return []
 
-
     @staticmethod
     def media_idade():
         try:
@@ -113,4 +113,3 @@ class Paciente:
         except DatabaseError as e:
             print(f"Erro ao acessar dados do banco: {e}")
             return None
-        

@@ -41,7 +41,8 @@ class Atendimento:
                     if atendimentos:
                         for atendimento in atendimentos:
                             print(
-                                f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, Data: {atendimento[2]}, CID-10: {atendimento[3]}")
+                                f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, "
+                                f"Data: {atendimento[2]}, CID-10: {atendimento[3]}")
                     else:
                         print("Nenhum atendimento encontrado para esta data.")
         except DatabaseError as e:
