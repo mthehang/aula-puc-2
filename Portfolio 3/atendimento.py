@@ -20,7 +20,8 @@ class Atendimento:
                     if cursor.fetchone() is None:
                         print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
                         return
-                    cursor.execute("""INSERT INTO Atendimento (ID_paciente, Data_atend, CID_10) VALUES (%s, %s, %s);""",
+                    cursor.execute("""INSERT INTO Atendimento (ID_paciente, Data_atend, CID_10) VALUES (%s, %s, %s)
+                    RETURNING ID_atend;""",
                                    (self.id_paciente, self.data_atend, self.cid_10))
                     self.id_atend = cursor.fetchone()[0]
                     conexao.commit()

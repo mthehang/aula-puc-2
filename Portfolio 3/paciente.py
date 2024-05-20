@@ -15,29 +15,36 @@ class Paciente:
         self.altura = altura
 
     def salvar(self):
-        with bd.obter_conexao() as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute("""
-                INSERT INTO Paciente (RG, Nome, Sexo, Data_nasc, Peso, Altura) VALUES (%s, %s, %s, %s, %s, %s) RETURNING ID_paciente;
-                """, (self.rg, self.nome, self.sexo, self.data_nasc, self.peso, self.altura))
-                self.id_paciente = cursor.fetchone()[0]
-                conexao.commit()
-        print(f"\nPaciente adicionado com sucesso. ID: {self.id_paciente}")
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""
+                    INSERT INTO Paciente (RG, Nome, Sexo, Data_nasc, Peso, Altura) VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING ID_paciente;
+                    """, (self.rg, self.nome, self.sexo, self.data_nasc, self.peso, self.altura))
+                    self.id_paciente = cursor.fetchone()[0]
+                    conexao.commit()
+            print(f"\nPaciente adicionado com sucesso. ID: {self.id_paciente}")
+        except (DatabaseError, IntegrityError) as e:
+            print(f"Erro ao salvar paciente: {e}")
 
     @staticmethod
     def listar_todos():
-        with bd.obter_conexao() as conexao:
-            with conexao.cursor() as cursor:
-                cursor.execute("""
-                    SELECT ID_paciente, Nome, RG, Sexo, Data_nasc, Peso, Altura 
-                    FROM Paciente 
-                    ORDER BY ID_paciente;
-                """)
-                pacientes = cursor.fetchall()
-                for paciente in pacientes:
-                    print(
-                        f"ID: {paciente[0]}, RG: {paciente[1]}, Nome: {paciente[2]}, Sexo: {paciente[3]}, Data de "
-                        f"Nascimento: {paciente[4]}, Peso: {paciente[5]} kg, Altura: {paciente[6]} m")
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT ID_paciente, Nome, RG, Sexo, Data_nasc, Peso, Altura 
+                        FROM Paciente 
+                        ORDER BY ID_paciente;
+                    """)
+                    pacientes = cursor.fetchall()
+                    for paciente in pacientes:
+                        print(
+                            f"ID: {paciente[0]}, RG: {paciente[1]}, Nome: {paciente[2]}, Sexo: {paciente[3]}, Data de "
+                            f"Nascimento: {paciente[4]}, Peso: {paciente[5]} kg, Altura: {paciente[6]} m")
+        except (DatabaseError, IntegrityError) as e:
+            print(f"Erro ao listar pacientes: {e}")
 
     @staticmethod
     def atualizar(id_paciente):
@@ -98,7 +105,7 @@ class Paciente:
                     cursor.execute("SELECT Sexo, COUNT(*) FROM Paciente GROUP BY Sexo;")
                     resultados = cursor.fetchall()
             return resultados
-        except DatabaseError as e:
+        except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao acessar dados do banco: {e}")
             return []
 
@@ -110,6 +117,6 @@ class Paciente:
                     cursor.execute("SELECT AVG(EXTRACT(YEAR FROM AGE(Data_nasc))) FROM Paciente;")
                     resultado = cursor.fetchone()
             return round(resultado[0], 1) if resultado else None
-        except DatabaseError as e:
+        except (DatabaseError, IntegrityError) as e:
             print(f"Erro ao acessar dados do banco: {e}")
             return None
