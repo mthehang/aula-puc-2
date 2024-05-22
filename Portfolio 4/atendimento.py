@@ -4,10 +4,11 @@ from dao import bd
 
 
 class Atendimento:
-    def __init__(self, id_atend=None, id_paciente=None, cid_10=None, cod_manchester=None):
+    def __init__(self, id_atend=None, id_paciente=None, cid_10=None,
+                 cod_manchester=None, data_atend=datetime.now().strftime('%Y-%m-%d %H:%M:%S')):
         self.id_atend = id_atend
         self.id_paciente = id_paciente
-        self.data_atend = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.data_atend = data_atend
         self.cid_10 = cid_10
         self.cod_manchester = cod_manchester
         self.erro = None
@@ -50,8 +51,10 @@ class Atendimento:
                 return True
             else:
                 self.erro = f"\nNenhum atendimento encontrado para {self.data_atend}."
+                return False
         except Error as e:
             self.erro = f"\n{str(e)}"
+            return False
 
     def listar_todos(self):
         try:
@@ -103,33 +106,32 @@ class Atendimento:
             conexao.rollback()
             return False
 
-    @staticmethod
-    def contar_por_paciente(id_paciente):
+    def contar_por_paciente(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    cursor.execute("SELECT COUNT(*) FROM Atendimento WHERE ID_paciente = %s;", (id_paciente,))
+                    cursor.execute("SELECT COUNT(*) FROM Atendimento WHERE ID_paciente = %s;", (self.id_paciente,))
                     resultado = cursor.fetchone()
-            return resultado[0] if resultado else 0
+            self.erro = f"Não há atendimentos para este paciente."
+            return resultado[0] if resultado else False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return 0
+            self.erro = f"\n{e}"
+            return False
 
-    @staticmethod
-    def contar_por_cid(cid):
+    def contar_por_cid(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("""SELECT COUNT(*) FROM Atendimento 
-                    WHERE CID_10 = %s;""", (cid,))
+                    WHERE CID_10 = %s;""", (self.cid_10,))
                     resultado = cursor.fetchone()
-            return resultado[0] if resultado else 0
+            self.erro = ("\nNenhum atendimento encontrado com o CID-10: ", self.cid_10)
+            return resultado[0] if resultado else False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return 0
+            self.erro = f"\n{str(e)}"
+            return False
 
-    @staticmethod
-    def valor_total_tuss(id_atendimento):
+    def valor_total_tuss(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor as cursor:
@@ -138,15 +140,15 @@ class Atendimento:
                     WHERE Cod_TUSS IN (
                         SELECT ID_tuss FROM Servico
                         WHERE ID_atend = %s
-                    );""", id_atendimento)
+                    );""", self.id_atend)
                     valor = cursor.fetchone()
-                    return valor.replace(".", ",") if valor else 0
+            self.erro = "\nErro: valor zerado."
+            return valor.replace(".", ",") if valor else False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return 0
+            self.erro = f"\nErro ao acessar dados do banco: {str(e)}"
+            return False
 
-    @staticmethod
-    def valor_paciente(id_paciente):
+    def valor_paciente(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor as cursor:
@@ -158,9 +160,10 @@ class Atendimento:
                                     SELECT ID_atend from Atendimento 
                                     WHERE ID_paciente = %s
                                 )
-                            );""", (id_paciente,))
+                            );""", (self.id_paciente,))
                     valor = cursor.fetchone()
-            return valor[0].replace(".", ",") if valor else 0
+            self.erro = "\nErro: valor zerado."
+            return valor[0].replace(".", ",") if valor else False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return 0
+            self.erro = f"\nErro ao acessar dados do banco: {str(e)}"
+            return False

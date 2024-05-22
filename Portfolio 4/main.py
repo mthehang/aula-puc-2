@@ -180,78 +180,80 @@ def menu_atendimento():
         print("3. Atualizar um atendimento de um paciente")
         print("4. Pesquisar atendimentos")
         print("00. Retornar ao Menu Principal")
-        try:
-            opcao = int(input("\nDigite uma opção: ").strip())
-
-            match opcao:
-                case 1:
-                    while True:
-                        try:
-                            id_paciente = int(input("\nID do paciente: ").strip())
-                            break
-                        except ValueError:
-                            print("\nPor favor, insira um número válido para o ID do paciente.")
-
-                    cid_10 = input("CID-10 do atendimento: ").strip().upper()
-                    cod_manchester = input("Código Manchester do atendimento: ").strip().title()
-
-                    atendimento = Atendimento(id_paciente=id_paciente, cid_10=cid_10, cod_manchester=cod_manchester)
-                    if atendimento.salvar():
-                        print(f"\nAtendimento ID {atendimento.id_atend} para o(a) paciente {atendimento.id_paciente} "
-                              f"cadastrado com sucesso na data e hora: {atendimento.data_atend}")
-                    else:
-                        print(atendimento.erro)
-
-                    input("\nPressione ENTER para retornar ao Menu Atendimentos")
-
-                case 2:
-                    atend = Atendimento()
-                    atendimentos = atend.listar_todos()
-                    if atendimentos:
-                        for atendimento in atendimentos:
-                            print(
-                                f"ID Atendimento: {atendimento[0]}, "
-                                f"ID Paciente: {atendimento[1]}, CID-10: {atendimento[2]}, "
-                                f"Código Manchester: {atendimento[3]}, Data: {atendimento[4]}")
-                    else:
-                        print(atend.erro)
-                    input("\nPressione ENTER para retornar ao Menu Atendimentos")
-                case 3:
-                    while True:
-                        try:
-                            id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: ").strip())
-                            break
-                        except ValueError:
-                            print("\nDigite um ID válido.")
-
-                    atendimento = Atendimento(id_atend=id_atend)
-                    dados = atendimento.carregar_dados()
-                    if dados:
-                        print(f"Dados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
-                              f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
-                    else:
-                        print(atendimento.erro)
-                        input("\nPressione ENTER para retornar ao Menu Pacientes")
+        while True:
+            try:
+                opcao = int(input("\nDigite uma opção: ").strip())
+                break
+            except ValueError:
+                print("Digite uma opção válida.")
+        match opcao:
+            case 1:
+                while True:
+                    try:
+                        id_paciente = int(input("\nID do paciente: ").strip())
                         break
+                    except ValueError:
+                        print("\nPor favor, insira um número válido para o ID do paciente.")
 
-                    novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
-                    novo_cod_manchester = input("Novo código Manchester "
-                                                "(deixe em branco para não alterar): ").strip().title()
+                cid_10 = input("CID-10 do atendimento: ").strip().upper()
+                cod_manchester = input("Código Manchester do atendimento: ").strip().title()
 
-                    if atendimento.atualizar(novo_cid_10, novo_cod_manchester):
-                        print(F"\nAtendimento ID: {atendimento.id_atend} atualizado com sucesso.")
-                    else:
-                        print(atendimento.erro)
+                atendimento = Atendimento(id_paciente=id_paciente, cid_10=cid_10, cod_manchester=cod_manchester)
+                if atendimento.salvar():
+                    print(f"\nAtendimento ID {atendimento.id_atend} para o(a) paciente {atendimento.id_paciente} "
+                          f"cadastrado com sucesso na data e hora: {atendimento.data_atend}")
+                else:
+                    print(atendimento.erro)
 
-                    input("\nPressione ENTER para retornar ao Menu Atendimentos")
-                case 4:
-                    submenu_atendimento()
-                case 00:
+                input("\nPressione ENTER para retornar ao Menu Atendimentos")
+
+            case 2:
+                atend = Atendimento()
+                atendimentos = atend.listar_todos()
+                if atendimentos:
+                    for atendimento in atendimentos:
+                        print(
+                            f"ID Atendimento: {atendimento[0]}, "
+                            f"ID Paciente: {atendimento[1]}, CID-10: {atendimento[2]}, "
+                            f"Código Manchester: {atendimento[3]}, Data: {atendimento[4]}")
+                else:
+                    print(atend.erro)
+                input("\nPressione ENTER para retornar ao Menu Atendimentos")
+            case 3:
+                while True:
+                    try:
+                        id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: ").strip())
+                        break
+                    except ValueError:
+                        print("\nDigite um ID válido.")
+
+                atendimento = Atendimento(id_atend=id_atend)
+                dados = atendimento.carregar_dados()
+                if dados:
+                    print(f"Dados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
+                          f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
+                else:
+                    print(atendimento.erro)
+                    input("\nPressione ENTER para retornar ao Menu Pacientes")
                     break
-                case _:
-                    print("Digite uma opção válida.")
-        except ValueError:
-            print("Digite uma opção válida.")
+
+                novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
+                novo_cod_manchester = input("Novo código Manchester "
+                                            "(deixe em branco para não alterar): ").strip().title()
+
+                if atendimento.atualizar(novo_cid_10, novo_cod_manchester):
+                    print(F"\nAtendimento ID: {atendimento.id_atend} atualizado com sucesso.")
+                else:
+                    print(atendimento.erro)
+
+                input("\nPressione ENTER para retornar ao Menu Atendimentos")
+            case 4:
+                submenu_atendimento()
+            case 00:
+                break
+            case _:
+                print("Digite uma opção válida.")
+
 
 
 def submenu_atendimento():
@@ -274,8 +276,12 @@ def submenu_atendimento():
                         else:
                             print("Data inválida. Por favor, insira a data no formato AAAA-MM-DD.")
 
-                    atendimento = Atendimento()
+                    atendimento = Atendimento(data_atend=data)
                     listar_data = atendimento.listar_data()
+                    if listar_data:
+                        print(listar_data)
+                    else:
+                        print(atendimento.erro)
 
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
 
@@ -286,12 +292,23 @@ def submenu_atendimento():
                             break
                         except ValueError:
                             print("\nDigite um número válido.")
+                    atendimento = Atendimento(id_paciente=id_paciente)
+                    contar = atendimento.contar_por_paciente()
+                    if contar:
+                        print("Quantidade de atendimentos para o paciente: ", contar)
+                    else:
+                        print(atendimento.erro)
 
-                    print("Quantidade de atendimentos para o paciente: ", Atendimento.contar_por_paciente(id_paciente))
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 3:
                     cid = input("\nDigite o CID-10: ").strip().upper()
-                    print("Quantidade de atendimentos para CID-10: ", Atendimento.contar_por_cid(cid))
+                    atendimento = Atendimento(cid_10=cid)
+                    contar = atendimento.contar_por_cid()
+                    if contar:
+                        print("Quantidade de atendimentos para CID-10: ", contar)
+                    else:
+                        print(atendimento.erro)
+
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 4:
                     while True:
@@ -301,11 +318,12 @@ def submenu_atendimento():
                             break
                         except ValueError:
                             print("\nDigite um ID válido")
-                    valor = Atendimento.valor_total_tuss(id_atendimento)
-                    if valor >= 0:
-                        print(f"Valor total: R${Atendimento.valor_total_tuss(id_atendimento)}")
+                    atendimento = Atendimento(id_atend=id_atendimento)
+                    valor = atendimento.valor_total_tuss()
+                    if valor:
+                        print(f"Valor total: R${valor}")
                     else:
-                        print("Erro ao acessar dados do banco")
+                        print(atendimento.erro)
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 5:
                     while True:
@@ -315,7 +333,12 @@ def submenu_atendimento():
                             break
                         except ValueError:
                             print("\nDigite um ID válido")
-                    print(f"Valor total do paciente ID: {id_paciente} é: R${Atendimento.valor_paciente(id_paciente)}")
+                    atendimento = Atendimento(id_paciente=id_paciente)
+                    valor = atendimento.valor_paciente()
+                    if valor:
+                        print(f"Valor total do paciente ID: {atendimento.id_paciente} é: R${valor}")
+                    else:
+                        print(atendimento.erro)
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 00:
                     break
