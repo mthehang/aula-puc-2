@@ -86,6 +86,7 @@ class BancoDeDados:
 
 
 bd = BancoDeDados()
+
 if __name__ == '__main__':
     bd.criar_tabelas()
     bd.alterar_tabelas()
