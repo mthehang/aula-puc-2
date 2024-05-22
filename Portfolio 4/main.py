@@ -18,7 +18,7 @@ def menu_paciente():
                 opcao = int(input("\nDigite uma opção: ").strip())
                 break
             except ValueError:
-                print("Opção inválida! Tente novamente.")
+                print("\nOpção inválida! Tente novamente.")
 
         match opcao:
             case 1:
@@ -38,14 +38,14 @@ def menu_paciente():
                     if sexo == 'M' or 'F':
                         break
                     else:
-                        print("Digite apenas M ou F.")
+                        print("\nDigite apenas M ou F.")
 
                 while True:
                     data_nasc = input("Data de nascimento (AAAA-MM-DD): ").strip()
                     if Paciente.validar_data(data_nasc):
                         break
                     else:
-                        print("Data inválida. Por favor, insira a data no formato AAAA-MM-DD.")
+                        print("\nData inválida. Por favor, insira a data no formato AAAA-MM-DD.")
 
                 while True:
                     try:
@@ -63,7 +63,7 @@ def menu_paciente():
 
                 paciente = Paciente(nome=nome, rg=rg, sexo=sexo, data_nasc=data_nasc, peso=peso, altura=altura)
                 if paciente.salvar():
-                    print(F"Paciente ID: {paciente.id_paciente} cadastrado com sucesso.")
+                    print(F"\nPaciente ID: {paciente.id_paciente} cadastrado com sucesso.")
                 else:
                     print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
@@ -71,13 +71,15 @@ def menu_paciente():
             case 2:
                 paciente = Paciente()
                 dados = paciente.listar_todos()
-                if dados not in [False, -1]:
+                if dados:
+                    print()
                     for dado in dados:
                         print(
                             f"ID: {dado[0]}, Nome: {dado[1]}, RG: {dado[2]}, "
                             f"Sexo: {dado[3]}, Data de Nascimento: {dado[4]}, "
                             f"Peso: {dado[5]} kg, Altura: {dado[6]} m")
-
+                else:
+                    print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
             case 3:
                 while True:
@@ -185,7 +187,7 @@ def menu_atendimento():
                 opcao = int(input("\nDigite uma opção: ").strip())
                 break
             except ValueError:
-                print("Digite uma opção válida.")
+                print("\nDigite uma opção válida.")
         match opcao:
             case 1:
                 while True:
@@ -211,6 +213,7 @@ def menu_atendimento():
                 atend = Atendimento()
                 atendimentos = atend.listar_todos()
                 if atendimentos:
+                    print()
                     for atendimento in atendimentos:
                         print(
                             f"ID Atendimento: {atendimento[0]}, "
@@ -230,7 +233,7 @@ def menu_atendimento():
                 atendimento = Atendimento(id_atend=id_atend)
                 dados = atendimento.carregar_dados()
                 if dados:
-                    print(f"Dados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
+                    print(f"\nDados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
                           f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
                 else:
                     print(atendimento.erro)
@@ -252,8 +255,7 @@ def menu_atendimento():
             case 00:
                 break
             case _:
-                print("Digite uma opção válida.")
-
+                print("\nDigite uma opção válida.")
 
 
 def submenu_atendimento():
@@ -274,7 +276,7 @@ def submenu_atendimento():
                         if Paciente.validar_data(data):
                             break
                         else:
-                            print("Data inválida. Por favor, insira a data no formato AAAA-MM-DD.")
+                            print("\nData inválida. Por favor, insira a data no formato AAAA-MM-DD.")
 
                     atendimento = Atendimento(data_atend=data)
                     listar_data = atendimento.listar_data()
@@ -283,7 +285,7 @@ def submenu_atendimento():
                     else:
                         print(atendimento.erro)
 
-                    input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+                    input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
 
                 case 2:
                     while True:
@@ -295,57 +297,58 @@ def submenu_atendimento():
                     atendimento = Atendimento(id_paciente=id_paciente)
                     contar = atendimento.contar_por_paciente()
                     if contar:
-                        print("Quantidade de atendimentos para o paciente: ", contar)
+                        print("\nQuantidade de atendimentos para o paciente: ", contar)
                     else:
                         print(atendimento.erro)
 
-                    input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+                    input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 3:
                     cid = input("\nDigite o CID-10: ").strip().upper()
                     atendimento = Atendimento(cid_10=cid)
                     contar = atendimento.contar_por_cid()
                     if contar:
-                        print("Quantidade de atendimentos para CID-10: ", contar)
+                        print("\nQuantidade de atendimentos para CID-10: ", contar)
                     else:
                         print(atendimento.erro)
 
-                    input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+                    input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 4:
                     while True:
                         try:
                             id_atendimento = int(
-                                input("Digite o ID do atendimento que deseja ver o valor total: ").strip())
+                                input("\nDigite o ID do atendimento que deseja ver o valor total: ").strip())
                             break
                         except ValueError:
                             print("\nDigite um ID válido")
                     atendimento = Atendimento(id_atend=id_atendimento)
                     valor = atendimento.valor_total_tuss()
                     if valor:
-                        print(f"Valor total: R${valor}")
+                        print(f"\nValor total: R${valor}")
                     else:
                         print(atendimento.erro)
-                    input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+                    input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 5:
                     while True:
                         try:
                             id_paciente = int(
-                                input("Digite o ID do paciente que deseja ver o valor total de atendimentos: ").strip())
+                                input(
+                                    "\nDigite o ID do paciente que deseja ver o valor total de atendimentos: ").strip())
                             break
                         except ValueError:
                             print("\nDigite um ID válido")
                     atendimento = Atendimento(id_paciente=id_paciente)
                     valor = atendimento.valor_paciente()
                     if valor:
-                        print(f"Valor total do paciente ID: {atendimento.id_paciente} é: R${valor}")
+                        print(f"\nValor total do paciente ID: {atendimento.id_paciente} é: R${valor}")
                     else:
                         print(atendimento.erro)
-                    input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+                    input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 00:
                     break
                 case _:
-                    print("Digite uma opção válida")
+                    print("\nDigite uma opção válida")
         except ValueError:
-            print("Digite uma opção válida")
+            print("\nDigite uma opção válida")
 
 
 def main_menu():

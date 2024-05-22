@@ -85,6 +85,7 @@ class Paciente:
                 if resultado:
                     return resultado
                 else:
+                    self.erro = "Não há pacientes cadastrados"
                     return False
             except Error as e:
                 self.erro = f"\n{str(e)}"
