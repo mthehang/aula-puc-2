@@ -4,12 +4,13 @@ from dao import bd
 
 
 class Atendimento:
-    def __init__(self, id_paciente, cid_10, cod_manchester):
+    def __init__(self, id_paciente=None, cid_10=None, cod_manchester=None):
         self.id_atend = None
         self.id_paciente = id_paciente
         self.data_atend = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.cid_10 = cid_10
         self.cod_manchester = cod_manchester
+        self.erro = None
 
     def salvar(self):
         try:
@@ -17,17 +18,24 @@ class Atendimento:
                 with conexao.cursor() as cursor:
                     cursor.execute("""SELECT CAT FROM CID10 WHERE CAT = %s;""", (self.cid_10,))
                     if cursor.fetchone() is None:
-                        print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
-                        return
-                    cursor.execute("""INSERT INTO Atendimento (ID_paciente, Data_atend, CID_10) VALUES (%s, %s, %s);""",
+                        self.erro = f"\nCID-10 {self.cid_10} inválido."
+                        return False
+
+                    cursor.execute("""SELECT 1 FROM Paciente WHERE ID_paciente = %s;""", (self.id_paciente,))
+                    if cursor.fetchone() is None:
+                        self.erro = f"\nID do paciente {self.id_paciente} não encontrado."
+                        return False
+
+                    cursor.execute("""INSERT INTO Atendimento (ID_paciente, Data_atend, CID_10)
+                    VALUES (%s, %s, %s) RETURNING ID_atend;""",
                                    (self.id_paciente, self.data_atend, self.cid_10))
                     self.id_atend = cursor.fetchone()[0]
                     conexao.commit()
-            print(f"""\nAtendimento ID {self.id_atend} para  o(a) paciente {self.id_paciente}
-            cadastrado com sucesso na data e hora: {self.data_atend}""")
+            return True
         except Error as e:
-            print(f"Erro ao salvar atendimento: {e}")
+            self.erro = f"\n{str(e)}"
             conexao.rollback()
+            return False
 
     @staticmethod
     def listar_data(data):

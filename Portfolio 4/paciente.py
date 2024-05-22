@@ -26,7 +26,7 @@ class Paciente:
                     conexao.commit()
                     return True
             except Error as e:
-                self.erro = e
+                self.erro = f"\n{str(e)}"
                 conexao.rollback()
                 return False
 
@@ -37,14 +37,16 @@ class Paciente:
                     cursor.execute("""SELECT Nome, RG, Sexo, Data_nasc, Peso, Altura FROM Paciente
                                     WHERE ID_paciente = %s;""", (self.id_paciente,))
                     dados = cursor.fetchone()
-                    if dados:
-                        self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura = dados
-                    else:
-                        return False
-            return True
+            if dados:
+                self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura = dados
+                return True
+            else:
+                self.erro = f"\nPaciente ID {self.id_paciente} não encontrado."
+                return False
+
         except Error as e:
-            self.erro = e
-            return -1
+            self.erro = f"\n{str(e)}"
+            return False
 
     def atualizar(self, novo_nome=None, novo_rg=None, novo_sexo=None, nova_data_nasc=None, novo_peso=None,
                   nova_altura=None):
@@ -67,11 +69,10 @@ class Paciente:
                     conexao.commit()
                     return True
         except Error as e:
-            self.erro = e
+            self.erro = f"\n{str(e)}"
             return False
 
-    @staticmethod
-    def listar_todos():
+    def listar_todos(self):
         with bd.obter_conexao() as conexao:
             try:
                 with conexao.cursor() as cursor:
@@ -85,32 +86,40 @@ class Paciente:
                         return resultado
                     else:
                         return False
-            except Error:
+            except Error as e:
+                self.erro = f"\n{str(e)}"
                 return False
 
-    @staticmethod
-    def contar_sexo():
+    def contar_sexo(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("SELECT Sexo, COUNT(*) FROM Paciente GROUP BY Sexo;")
                     resultados = cursor.fetchall()
-            return resultados
+            if resultados:
+                resultados = "\n".join(f"Sexo: {sexo}, Quantidade: {count}" for sexo, count in resultados)
+                return resultados
+            else:
+                self.erro = f"\nNão há dados disponíveis."
+                return False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return []
+            self.erro = f"\n{str(e)}"
+            return False
 
-    @staticmethod
-    def media_idade():
+    def media_idade(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("SELECT AVG(EXTRACT(YEAR FROM AGE(Data_nasc))) FROM Paciente;")
                     resultado = cursor.fetchone()
-            return round(resultado[0], 1) if resultado else None
+            if resultado:
+                return round(resultado[0], 1)
+            else:
+                self.erro = "\nNão há dados disponíveis."
+                return False
         except Error as e:
-            print(f"Erro ao acessar dados do banco: {e}")
-            return None
+            self.erro = e
+            return False
 
     @staticmethod
     def validar_data(data):

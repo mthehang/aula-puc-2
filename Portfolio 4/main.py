@@ -2,10 +2,6 @@ from paciente import Paciente
 from atendimento import Atendimento
 from servico import Servico
 
-from psycopg2 import Error
-
-Error
-
 
 def menu_paciente():
     while True:
@@ -33,13 +29,13 @@ def menu_paciente():
                         if len(str(rg)) == 9:
                             break
                         else:
-                            print("Por favor, insira um número RG válido.")
+                            print("\nPor favor, insira um número RG válido.")
                     except ValueError:
-                        print("Por favor, insira um número RG válido.")
+                        print("\nPor favor, insira um número RG válido.")
 
                 while True:
                     sexo = input("Sexo (M/F): ").strip().upper()
-                    if len(sexo) == 1 and sexo == 'M' or 'F':
+                    if sexo == 'M' or 'F':
                         break
                     else:
                         print("Digite apenas M ou F.")
@@ -56,14 +52,14 @@ def menu_paciente():
                         peso = float(input("Peso (kg): ").strip().replace(',', '.'))
                         break
                     except ValueError:
-                        print("Por favor, insira um peso válido.")
+                        print("\nPor favor, insira um peso válido.")
 
                 while True:
                     try:
                         altura = float(input("Altura (m): ").strip().replace(',', '.'))
                         break
                     except ValueError:
-                        print("Por favor, insira um peso válido.")
+                        print("\nPor favor, insira um peso válido.")
 
                 paciente = Paciente(nome=nome, rg=rg, sexo=sexo, data_nasc=data_nasc, peso=peso, altura=altura)
                 if paciente.salvar():
@@ -73,8 +69,9 @@ def menu_paciente():
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
 
             case 2:
-                dados = Paciente.listar_todos()
-                if dados:
+                paciente = Paciente()
+                dados = paciente.listar_todos()
+                if dados not in [False, -1]:
                     for dado in dados:
                         print(
                             f"ID: {dado[0]}, Nome: {dado[1]}, RG: {dado[2]}, "
@@ -88,42 +85,89 @@ def menu_paciente():
                         id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: ").strip())
                         break
                     except ValueError:
-                        print("Digite um ID válido.")
+                        print("\nDigite um ID válido.")
 
                 paciente = Paciente(id_paciente=id_paciente)
                 dados = paciente.carregar_dados()
-                if dados not in [None, -1]:
+                if dados:
                     print(f"Dados Atuais — Nome: {paciente.nome}, RG: {paciente.rg}, Sexo: {paciente.sexo}, "
-                          f"Data de Nascimento: {paciente.data_nasc}, Peso: {paciente.peso}, Altura: {paciente.altura}")
-                elif dados is None:
-                    print("Paciente não encontrado.")
-                    break
+                          f"Data de Nascimento: {paciente.data_nasc}, Peso: {paciente.peso} kg, Altura: {paciente.altura} m")
                 else:
-                    print(f"Erro ao conectar com banco de dados: {paciente.erro}")
+                    print(paciente.erro)
+                    input("\nPressione ENTER para retornar ao Menu Pacientes")
+                    break
 
                 novo_nome = input("Novo nome (deixe em branco para não alterar): ").strip().title()
-                novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip()
-                novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper()
-                nova_data_nasc = input(
-                    "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip()
-                novo_peso = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',', '.')
-                nova_altura = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(
-                    ',', '.')
+                while True:
+                    try:
+                        novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip()
+                        if len(str(novo_rg)) == 9:
+                            break
+                        else:
+                            print("\nPor favor, insira um número novo RG válido.")
+                    except ValueError:
+                        print("\nPor favor, insira um número novo RG válido.")
+
+                while True:
+                    novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper()
+                    if novo_sexo == 'M' or 'F':
+                        break
+                    else:
+                        print("Digite apenas M ou F.")
+
+                while True:
+                    nova_data_nasc = input(
+                        "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip()
+                    if Paciente.validar_data(nova_data_nasc):
+                        break
+                    else:
+                        print("Data inválida. Por favor, insira a nova data no formato AAAA-MM-DD.")
+
+                while True:
+                    try:
+                        novo_peso = input("Novo peso (kg, deixe em branco para não alterar): ").strip().replace(',',
+                                                                                                                '.')
+                        break
+                    except ValueError:
+                        print("\nPor favor, insira um peso válido.")
+
+                while True:
+                    try:
+                        nova_altura = float(
+                            input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(
+                                ',', '.'))
+                        break
+                    except ValueError:
+                        print("\nPor favor, insira um peso válido.")
 
                 if paciente.atualizar(novo_nome, novo_rg, novo_sexo, nova_data_nasc, novo_peso, nova_altura):
-                    print(F"Paciente ID: {paciente.id_paciente} atualizado com sucesso.")
+                    print(F"\nPaciente ID: {paciente.id_paciente} atualizado com sucesso.")
                 else:
                     print(f"Erro ao atualizar cadastro de paciente: {paciente.erro}")
 
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
             case 4:
-                print("\nQuantidade de pacientes por sexo:", Paciente.contar_sexo())
+                paciente = Paciente()
+                valor = paciente.contar_sexo()
+                if valor:
+                    print(valor)
+                else:
+                    print(paciente.erro)
+
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
+
             case 5:
-                print("\nIdade média dos pacientes:", Paciente.media_idade())
+                paciente = Paciente()
+                media = paciente.media_idade()
+                if media:
+                    print("\nIdade média dos pacientes: ", media)
+                else:
+                    print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
+
             case 00:
                 break
+
             case _:
                 print("Opção inválida! Tente novamente.")
 
@@ -146,13 +190,18 @@ def menu_atendimento():
                             id_paciente = int(input("\nID do paciente: ").strip())
                             break
                         except ValueError:
-                            print("Por favor, insira um número válido para o ID do paciente.")
+                            print("\nPor favor, insira um número válido para o ID do paciente.")
 
                     cid_10 = input("CID-10 do atendimento: ").strip().upper()
-                    cod_manchester = input("Código Manchester do atendimento: ").strip().upper()
+                    cod_manchester = input("Código Manchester do atendimento: ").strip().title()
 
-                    atendimento = Atendimento(id_paciente, cid_10, cod_manchester)
-                    atendimento.salvar()
+                    atendimento = Atendimento(id_paciente=id_paciente, cid_10=cid_10, cod_manchester=cod_manchester)
+                    if atendimento.salvar():
+                        print(f"\nAtendimento ID {atendimento.id_atend} para o(a) paciente {atendimento.id_paciente} "
+                              f"cadastrado com sucesso na data e hora: {atendimento.data_atend}")
+                    else:
+                        print(atendimento.erro)
+
                     input("\nPressione ENTER para retornar ao Menu Atendimentos")
 
                 case 2:
@@ -164,7 +213,7 @@ def menu_atendimento():
                             id_atend = int(input("\nDigite o ID do atendimento a ser atualizado: ").strip())
                             break
                         except ValueError:
-                            print("Digite um ID válido.")
+                            print("\nDigite um ID válido.")
 
                     Atendimento.atualizar(id_atend)
                     input("\nPressione ENTER para retornar ao Menu Atendimentos")
@@ -206,7 +255,7 @@ def submenu_atendimento():
                             id_paciente = int(input("\nDigite o ID do paciente: ").strip())
                             break
                         except ValueError:
-                            print("Digite um número válido.")
+                            print("\nDigite um número válido.")
 
                     print("Quantidade de atendimentos para o paciente: ", Atendimento.contar_por_paciente(id_paciente))
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
@@ -221,7 +270,7 @@ def submenu_atendimento():
                                 input("Digite o ID do atendimento que deseja ver o valor total: ").strip())
                             break
                         except ValueError:
-                            print("Digite um ID válido")
+                            print("\nDigite um ID válido")
                     valor = Atendimento.valor_total_tuss(id_atendimento)
                     if valor >= 0:
                         print(f"Valor total: R${Atendimento.valor_total_tuss(id_atendimento)}")
@@ -235,7 +284,7 @@ def submenu_atendimento():
                                 input("Digite o ID do paciente que deseja ver o valor total de atendimentos: ").strip())
                             break
                         except ValueError:
-                            print("Digite um ID válido")
+                            print("\nDigite um ID válido")
                     print(f"Valor total do paciente ID: {id_paciente} é: R${Atendimento.valor_paciente(id_paciente)}")
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 00:
