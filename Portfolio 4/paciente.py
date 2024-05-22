@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class Paciente:
-    def __init__(self, id_paciente=None, rg=None, nome=None, sexo=None, data_nasc=None, peso=None, altura=None):
+    def __init__(self, id_paciente=None, nome=None, rg=None, sexo=None, data_nasc=None, peso=None, altura=None):
         self.id_paciente = id_paciente
         self.rg = rg
         self.nome = nome
@@ -67,7 +67,7 @@ class Paciente:
                         WHERE ID_paciente = %s;
                     """, (self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura, self.id_paciente))
                     conexao.commit()
-                    return True
+            return True
         except Error as e:
             self.erro = f"\n{str(e)}"
             return False
@@ -82,10 +82,10 @@ class Paciente:
                         ORDER BY ID_paciente;
                     """)
                     resultado = cursor.fetchall()
-                    if resultado:
-                        return resultado
-                    else:
-                        return False
+                if resultado:
+                    return resultado
+                else:
+                    return False
             except Error as e:
                 self.erro = f"\n{str(e)}"
                 return False

@@ -65,7 +65,7 @@ def menu_paciente():
                 if paciente.salvar():
                     print(F"Paciente ID: {paciente.id_paciente} cadastrado com sucesso.")
                 else:
-                    print(f"Erro ao cadastrar paciente: {paciente.erro}")
+                    print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
 
             case 2:
@@ -205,7 +205,16 @@ def menu_atendimento():
                     input("\nPressione ENTER para retornar ao Menu Atendimentos")
 
                 case 2:
-                    Atendimento.listar_todos()
+                    atend = Atendimento()
+                    atendimentos = atend.listar_todos()
+                    if atendimentos:
+                        for atendimento in atendimentos:
+                            print(
+                                f"ID Atendimento: {atendimento[0]}, "
+                                f"ID Paciente: {atendimento[1]}, CID-10: {atendimento[2]}, "
+                                f"Código Manchester: {atendimento[3]}, Data: {atendimento[4]}")
+                    else:
+                        print(atend.erro)
                     input("\nPressione ENTER para retornar ao Menu Atendimentos")
                 case 3:
                     while True:
@@ -215,7 +224,25 @@ def menu_atendimento():
                         except ValueError:
                             print("\nDigite um ID válido.")
 
-                    Atendimento.atualizar(id_atend)
+                    atendimento = Atendimento(id_atend=id_atend)
+                    dados = atendimento.carregar_dados()
+                    if dados:
+                        print(f"Dados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
+                              f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
+                    else:
+                        print(atendimento.erro)
+                        input("\nPressione ENTER para retornar ao Menu Pacientes")
+                        break
+
+                    novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
+                    novo_cod_manchester = input("Novo código Manchester "
+                                                "(deixe em branco para não alterar): ").strip().title()
+
+                    if atendimento.atualizar(novo_cid_10, novo_cod_manchester):
+                        print(F"\nAtendimento ID: {atendimento.id_atend} atualizado com sucesso.")
+                    else:
+                        print(atendimento.erro)
+
                     input("\nPressione ENTER para retornar ao Menu Atendimentos")
                 case 4:
                     submenu_atendimento()
@@ -247,8 +274,11 @@ def submenu_atendimento():
                         else:
                             print("Data inválida. Por favor, insira a data no formato AAAA-MM-DD.")
 
-                    Atendimento.listar_data(data)
+                    atendimento = Atendimento()
+                    listar_data = atendimento.listar_data()
+
                     input("Pressione ENTER para retornar ao Menu Pesquisar Atendimentos")
+
                 case 2:
                     while True:
                         try:

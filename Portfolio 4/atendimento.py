@@ -4,8 +4,8 @@ from dao import bd
 
 
 class Atendimento:
-    def __init__(self, id_paciente=None, cid_10=None, cod_manchester=None):
-        self.id_atend = None
+    def __init__(self, id_atend=None, id_paciente=None, cid_10=None, cod_manchester=None):
+        self.id_atend = id_atend
         self.id_paciente = id_paciente
         self.data_atend = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.cid_10 = cid_10
@@ -37,68 +37,71 @@ class Atendimento:
             conexao.rollback()
             return False
 
-    @staticmethod
-    def listar_data(data):
+    def listar_data(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute(
                         """SELECT ID_atend, ID_paciente, Data_atend, CID_10 FROM Atendimento 
                         WHERE DATE(Data_atend) = %s ORDER BY ID_atend;""",
-                        (data,))
+                        (self.data_atend,))
                     atendimentos = cursor.fetchall()
-                    if atendimentos:
-                        for atendimento in atendimentos:
-                            print(
-                                f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, "
-                                f"Data: {atendimento[2]}, CID-10: {atendimento[3]}")
-                    else:
-                        print("Nenhum atendimento encontrado para esta data.")
+            if atendimentos:
+                return True
+            else:
+                self.erro = f"\nNenhum atendimento encontrado para {self.data_atend}."
         except Error as e:
-            print(f"Erro ao listar atendimentos: {e}")
+            self.erro = f"\n{str(e)}"
 
-    @staticmethod
-    def listar_todos():
+    def listar_todos(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute(
-                        """SELECT ID_atend, ID_paciente, Data_atend, CID_10 FROM Atendimento ORDER BY ID_atend;""")
+                        """SELECT ID_atend, ID_paciente, CID_10, Cod_manchester, Data_atend FROM Atendimento 
+                        ORDER BY ID_atend;""")
                     atendimentos = cursor.fetchall()
-                    for atendimento in atendimentos:
-                        print(
-                            f"ID Atendimento: {atendimento[0]}, ID Paciente: {atendimento[1]}, Data: {atendimento[2]}, "
-                            f"CID-10: {atendimento[3]}")
+            if atendimentos:
+                return atendimentos
+            else:
+                self.erro = f"\nNão há atendimentos"
+                return False
         except Error as e:
-            print(f"Erro ao listar atendimentos: {e}")
+            self.erro = f"Erro ao listar atendimentos: {e}"
+            return False
 
-    @staticmethod
-    def atualizar(id_atend):
+    def carregar_dados(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    cursor.execute("""SELECT CID_10 FROM Atendimento WHERE ID_atend = %s;""", (id_atend,))
-                    cid_atual = cursor.fetchone()
-                    if not cid_atual:
-                        print("Atendimento não encontrado!")
-                        return
-
-                    print(f"CID-10 atual: {cid_atual[0]}")
-                    novo_cid_10 = input("Novo CID-10 (deixe em branco para não alterar): ").strip().upper()
-                    if novo_cid_10:
-                        cursor.execute("""SELECT CAT FROM CID10 WHERE CAT = %s;""", (novo_cid_10,))
-                        if cursor.fetchone() is None:
-                            print("\nCID-10 não encontrado! Por favor, insira um CID-10 válido.")
-                            return
-                    if not novo_cid_10:
-                        novo_cid_10 = cid_atual[0]
-                    cursor.execute("""UPDATE Atendimento SET CID_10 = %s WHERE ID_atend = %s;""",
-                                   (novo_cid_10, id_atend))
-                    conexao.commit()
-                    print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
+                    cursor.execute("""SELECT ID_paciente, cid_10, Cod_manchester, Data_atend FROM Atendimento
+                                      WHERE ID_atend = %s;""", (self.id_atend,))
+                    dados = cursor.fetchone()
+            if dados:
+                self.id_paciente, self.cid_10, self.cod_manchester, self.data_atend = dados
+                return True
+            else:
+                self.erro = f"\nAtendimento ID {self.id_atend} não encontrado."
+                return False
         except Error as e:
-            print(f"Erro ao atualizar atendimento: {e}")
+            self.erro = f"\n{str(e)}"
+            return False
+
+    def atualizar(self, novo_cid_10=None, novo_cod_manchester=None):
+        self.cid_10 = novo_cid_10 or self.cid_10
+        self.cod_manchester = novo_cod_manchester or self.cod_manchester
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""UPDATE Atendimento SET 
+                    CID_10 = %s, COD_manchester = %s WHERE ID_atend = %s;""",
+                                   (self.cid_10, self.cod_manchester, self.id_atend))
+                    conexao.commit()
+            return True
+        except Error as e:
+            self.erro = f"\nErro ao atualizar atendimento: {str(e)}"
             conexao.rollback()
+            return False
 
     @staticmethod
     def contar_por_paciente(id_paciente):
