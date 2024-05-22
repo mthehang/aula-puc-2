@@ -142,7 +142,9 @@ def menu_paciente():
                     except ValueError:
                         print("\nPor favor, insira um peso válido.")
 
-                if paciente.atualizar(novo_nome, novo_rg, novo_sexo, nova_data_nasc, novo_peso, nova_altura):
+                if paciente.atualizar(novo_nome=novo_nome, novo_rg=novo_rg, novo_sexo=novo_sexo,
+                                      nova_data_nasc=nova_data_nasc, novo_peso=novo_peso, nova_altura=nova_altura):
+
                     print(F"\nPaciente ID: {paciente.id_paciente} atualizado com sucesso.")
                 else:
                     print(f"Erro ao atualizar cadastro de paciente: {paciente.erro}")
