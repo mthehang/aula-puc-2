@@ -281,7 +281,10 @@ def submenu_atendimento():
                     atendimento = Atendimento(data_atend=data)
                     listar_data = atendimento.listar_data()
                     if listar_data:
-                        print(listar_data)
+                        for data in listar_data:
+                            data_formatada = data[2].strftime('%d/%m/%Y %H:%M:%S')
+                            print(f"ID Atendimento: {data[0]}, ID Paciente: {data[1]}, "
+                                  f"Data Atendimento: {data_formatada}, CID-10: {data[3]}")
                     else:
                         print(atendimento.erro)
 

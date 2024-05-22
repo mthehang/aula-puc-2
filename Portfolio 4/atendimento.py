@@ -39,6 +39,7 @@ class Atendimento:
             return False
 
     def listar_data(self):
+        #falta código manchester
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
@@ -48,7 +49,7 @@ class Atendimento:
                         (self.data_atend,))
                     atendimentos = cursor.fetchall()
             if atendimentos:
-                return True
+                return atendimentos
             else:
                 self.erro = f"\nNenhum atendimento encontrado para {self.data_atend}."
                 return False
