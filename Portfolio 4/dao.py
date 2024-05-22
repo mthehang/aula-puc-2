@@ -48,19 +48,19 @@ class BancoDeDados:
                         );""")
 
                     cursor.execute("""
-                        CREATE TABLE IF NOT EXISTS TUSS (
-                        Cod_TUSS VARCHAR(8) PRIMARY KEY,
-                        Descr VARCHAR(255),
-                        Valor FLOAT         
-                        );""")
-
-                    cursor.execute("""
                        CREATE TABLE IF NOT EXISTS Servico (
                        ID_atend_serv SERIAL PRIMARY KEY,
                        ID_atend INT REFERENCES Atendimento(ID_atend),
                        ID_tuss VARCHAR(8),
                        Data_Serv TIMESTAMP
                        );""")
+
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS TUSS (
+                        Cod_TUSS VARCHAR(8) PRIMARY KEY,
+                        Descr VARCHAR(255),
+                        Valor FLOAT         
+                        );""")
 
                     conexao.commit()
 
@@ -85,7 +85,7 @@ class BancoDeDados:
             print("Não foi possível alterar as tabelas: ", e)
 
 
+bd = BancoDeDados()
 if __name__ == '__main__':
-    bd = BancoDeDados()
     bd.criar_tabelas()
     bd.alterar_tabelas()

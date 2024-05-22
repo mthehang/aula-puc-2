@@ -1,8 +1,6 @@
 from datetime import datetime
 from psycopg2 import Error
-from dao import BancoDeDados
-
-bd = BancoDeDados()
+from dao import bd
 
 
 class Atendimento:
@@ -25,9 +23,11 @@ class Atendimento:
                                    (self.id_paciente, self.data_atend, self.cid_10))
                     self.id_atend = cursor.fetchone()[0]
                     conexao.commit()
-            print(f"\nAtendimento ID {self.id_atend} adicionado com sucesso na data e hora: {self.data_atend}")
+            print(f"""\nAtendimento ID {self.id_atend} para  o(a) paciente {self.id_paciente}
+            cadastrado com sucesso na data e hora: {self.data_atend}""")
         except Error as e:
             print(f"Erro ao salvar atendimento: {e}")
+            conexao.rollback()
 
     @staticmethod
     def listar_data(data):
@@ -90,6 +90,7 @@ class Atendimento:
                     print(f"Atendimento {id_atend} atualizado com sucesso. Novo CID-10: {novo_cid_10}")
         except Error as e:
             print(f"Erro ao atualizar atendimento: {e}")
+            conexao.rollback()
 
     @staticmethod
     def contar_por_paciente(id_paciente):
@@ -117,16 +118,18 @@ class Atendimento:
             return 0
 
     @staticmethod
-    def valor_total_tuss(tuss):
+    def valor_total_tuss(id_atendimento):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor as cursor:
                     cursor.execute("""
                     SELECT SUM(Valor) FROM TUSS
-                    WHERE cod_tuss = %s
-                    ;""", tuss)
-                    resultado = cursor.fetchone()
-            return resultado[0] if resultado else 0
+                    WHERE Cod_TUSS IN (
+                        SELECT ID_tuss FROM Servico
+                        WHERE ID_atend = %s
+                    );""", id_atendimento)
+                    valor = cursor.fetchone()
+                    return valor.replace(".", ",") if valor else 0
         except Error as e:
             print(f"Erro ao acessar dados do banco: {e}")
             return 0
@@ -137,24 +140,16 @@ class Atendimento:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor as cursor:
                     cursor.execute("""
-                        SELECT ID_atend from Atendimento 
-                        WHERE ID_paciente = %s;
-                    """, id_paciente,)
-                    ids_atendimentos = cursor.fetchall()
-
-                    cursor.execute("""
-                        SELECT ID_tuss from Servico
-                        WHERE ID_atend = %s;
-                    """, ids_atendimentos,)
-                    ids_tuss = cursor.fetchall()
-
-                    cursor.execute("""
-                        SELECT SUM(Valor) from TUSS
-                        WHERE Cod_TUSS = %s;
-                    """, ids_tuss,)
-                    valor = cursor.fetchall()
-            return valor
+                            SELECT SUM(Valor) FROM TUSS
+                            WHERE Cod_TUSS IN (
+                                SELECT ID_tuss FROM Servico
+                                WHERE ID_atend IN (
+                                    SELECT ID_atend from Atendimento 
+                                    WHERE ID_paciente = %s
+                                )
+                            );""", (id_paciente,))
+                    valor = cursor.fetchone()
+            return valor[0].replace(".", ",") if valor else 0
         except Error as e:
-            print("Erro ao acessar o banco de dados: ", e)
-
-
+            print(f"Erro ao acessar dados do banco: {e}")
+            return 0

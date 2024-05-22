@@ -1,9 +1,6 @@
 import pandas as pd
 from psycopg2 import Error
-
-from dao import BancoDeDados
-
-bd = BancoDeDados()
+from dao import bd
 
 
 def ler_excel_para_df(caminho_arquivo):
