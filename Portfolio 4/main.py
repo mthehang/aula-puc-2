@@ -86,6 +86,7 @@ def menu_paciente():
                     print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
             case 3:
+                # ERRO, precise corridor
                 while True:
                     try:
                         id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: ").strip())
@@ -107,7 +108,7 @@ def menu_paciente():
                 while True:
                     try:
                         novo_rg = input("Novo RG (deixe em branco para não alterar): ").strip()
-                        if len(str(novo_rg)) == 9:
+                        if novo_rg in [None, ""] or (novo_rg.isdigit() and len(novo_rg) == 9):
                             break
                         else:
                             print("\nPor favor, insira um número novo RG válido.")
