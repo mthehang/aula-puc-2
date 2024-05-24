@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from psycopg2 import Error
 from dao import bd
-from datetime import datetime
 
 
 class Paciente:
@@ -19,8 +20,23 @@ class Paciente:
             try:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
-                    INSERT INTO Paciente (Nome, RG, Sexo, Data_nasc, Peso, Altura) VALUES (%s, %s, %s, %s, %s, %s) 
-                    RETURNING ID_paciente;
+                    SET 
+                        datestyle = 'ISO, DMY';
+                    """)
+                    cursor.execute("""
+                    INSERT 
+                        INTO Paciente (
+                            Nome, 
+                            RG, 
+                            Sexo, 
+                            Data_nasc, 
+                            Peso, 
+                            Altura
+                        ) 
+                        VALUES 
+                            (%s, %s, %s, %s, %s, %s) 
+                    RETURNING 
+                        ID_paciente;
                     """, (self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura))
                     self.id_paciente = cursor.fetchone()[0]
                     conexao.commit()
@@ -34,8 +50,19 @@ class Paciente:
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    cursor.execute("""SELECT Nome, RG, Sexo, Data_nasc, Peso, Altura FROM Paciente
-                                    WHERE ID_paciente = %s;""", (self.id_paciente,))
+                    cursor.execute("""
+                    SELECT 
+                        Nome, 
+                        RG, 
+                        Sexo, 
+                        to_char(Data_nasc, 'DD/MM/YYYY'), 
+                        Peso, 
+                        Altura 
+                    FROM 
+                        Paciente
+                    WHERE 
+                        ID_paciente = %s;
+                    """, (self.id_paciente,))
                     dados = cursor.fetchone()
             if dados:
                 self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura = dados
@@ -62,9 +89,21 @@ class Paciente:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
-                        UPDATE Paciente SET
-                        Nome = %s, RG = %s, Sexo = %s, Data_nasc = %s, Peso = %s, Altura = %s
-                        WHERE ID_paciente = %s;
+                    SET 
+                        datestyle = 'ISO, DMY';
+                    """)
+                    cursor.execute("""
+                    UPDATE 
+                        Paciente 
+                    SET
+                        Nome = %s, 
+                        RG = %s, 
+                        Sexo = %s, 
+                        Data_nasc = %s, 
+                        Peso = %s, 
+                        Altura = %s
+                    WHERE 
+                        ID_paciente = %s;
                     """, (self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura, self.id_paciente))
                     conexao.commit()
             return True
@@ -77,9 +116,18 @@ class Paciente:
             try:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
-                        SELECT ID_paciente, Nome, RG, Sexo, Data_nasc, Peso, Altura 
-                        FROM Paciente 
-                        ORDER BY ID_paciente;
+                    SELECT 
+                        ID_paciente, 
+                        Nome, 
+                        RG, 
+                        Sexo, 
+                        to_char(Data_nasc, 'DD/MM/YYYY'), 
+                        Peso, 
+                        Altura 
+                    FROM 
+                        Paciente 
+                    ORDER BY 
+                        ID_paciente;
                     """)
                     resultado = cursor.fetchall()
                 if resultado:
@@ -95,7 +143,15 @@ class Paciente:
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    cursor.execute("SELECT Sexo, COUNT(*) FROM Paciente GROUP BY Sexo;")
+                    cursor.execute("""
+                    SELECT 
+                        Sexo, 
+                        COUNT(*) 
+                    FROM 
+                        Paciente 
+                    GROUP BY 
+                        Sexo;
+                    """)
                     resultados = cursor.fetchall()
             if resultados:
                 resultados = "\n".join(f"Sexo: {sexo}, Quantidade: {count}" for sexo, count in resultados)
@@ -111,7 +167,18 @@ class Paciente:
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    cursor.execute("SELECT AVG(EXTRACT(YEAR FROM AGE(Data_nasc))) FROM Paciente;")
+                    cursor.execute("""
+                    SELECT 
+                        AVG (
+                            EXTRACT (
+                                YEAR FROM AGE (
+                                    Data_nasc
+                                )
+                            )
+                        ) 
+                    FROM 
+                        Paciente;
+                    """)
                     resultado = cursor.fetchone()
             if resultado:
                 return round(resultado[0], 1)
@@ -125,7 +192,7 @@ class Paciente:
     @staticmethod
     def validar_data(data):
         try:
-            datetime.strptime(data, "%Y-%m-%d")
+            datetime.strptime(data, "%d/%m/%Y")
             return True
         except ValueError:
             return False

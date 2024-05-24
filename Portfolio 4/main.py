@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from paciente import Paciente
 from atendimento import Atendimento
 from servico import Servico
@@ -41,11 +43,11 @@ def menu_paciente():
                         print("\nDigite apenas M ou F.")
 
                 while True:
-                    data_nasc = input("Data de nascimento (AAAA-MM-DD): ").strip()
+                    data_nasc = input("Data de nascimento (DD/MM/AAAA): ").strip()
                     if Paciente.validar_data(data_nasc):
                         break
                     else:
-                        print("\nData inválida. Por favor, insira a data no formato AAAA-MM-DD.")
+                        print("\nData inválida. Por favor, insira a data no formato DD/MM/AAAA.")
 
                 while True:
                     try:
@@ -61,7 +63,9 @@ def menu_paciente():
                     except ValueError:
                         print("\nPor favor, insira um peso válido.")
 
-                paciente = Paciente(nome=nome, rg=rg, sexo=sexo, data_nasc=data_nasc, peso=peso, altura=altura)
+                paciente = Paciente(nome=nome, rg=rg, sexo=sexo,
+                                    data_nasc=datetime.strptime(data_nasc, "%d/%m/%Y").strftime('%Y-%m-%d'),
+                                    peso=peso, altura=altura)
                 if paciente.salvar():
                     print(F"\nPaciente ID: {paciente.id_paciente} cadastrado com sucesso.")
                 else:
@@ -119,7 +123,7 @@ def menu_paciente():
 
                 while True:
                     nova_data_nasc = input(
-                        "Nova data de nascimento (AAAA-MM-DD, deixe em branco para não alterar): ").strip()
+                        "Nova data de nascimento (DD/MM/AAAA, deixe em branco para não alterar): ").strip()
                     if Paciente.validar_data(nova_data_nasc):
                         break
                     else:
@@ -184,12 +188,14 @@ def menu_atendimento():
         print("3. Atualizar um atendimento de um paciente")
         print("4. Pesquisar atendimentos")
         print("00. Retornar ao Menu Principal")
+
         while True:
             try:
                 opcao = int(input("\nDigite uma opção: ").strip())
                 break
             except ValueError:
                 print("\nDigite uma opção válida.")
+
         match opcao:
             case 1:
                 while True:
@@ -223,6 +229,7 @@ def menu_atendimento():
                             f"Código Manchester: {atendimento[3]}, Data: {atendimento[4]}")
                 else:
                     print(atend.erro)
+
                 input("\nPressione ENTER para retornar ao Menu Atendimentos")
             case 3:
                 while True:
@@ -252,8 +259,10 @@ def menu_atendimento():
                     print(atendimento.erro)
 
                 input("\nPressione ENTER para retornar ao Menu Atendimentos")
+
             case 4:
                 submenu_atendimento()
+
             case 00:
                 break
             case _:
@@ -262,7 +271,7 @@ def menu_atendimento():
 
 def submenu_atendimento():
     while True:
-        print("\n Menu Pesquisar Atendimentos")
+        print("\nMenu Pesquisar Atendimentos")
         print("1. Pesquisar atendimentos por data")
         print("2. Quantidade de atendimentos para um paciente")
         print("3. Quantidade de atendimentos para um CID-10")
@@ -274,19 +283,19 @@ def submenu_atendimento():
             match opcao:
                 case 1:
                     while True:
-                        data = input("\nDigite a data que deseja pesquisar atendimentos (AAAA-MM-DD): ").strip()
+                        data = input("\nDigite a data que deseja pesquisar atendimentos (DD/MM/AAAA): ").strip()
                         if Paciente.validar_data(data):
                             break
                         else:
-                            print("\nData inválida. Por favor, insira a data no formato AAAA-MM-DD.")
+                            print("\nData inválida. Por favor, insira a data no formato DD/MM/AAAA.")
 
-                    atendimento = Atendimento(data_atend=data)
+                    atendimento = Atendimento(data_atend=datetime.strptime(data, "%d/%m/%Y").strftime('%Y-%m-%d'))
                     listar_data = atendimento.listar_data()
                     if listar_data:
                         for data in listar_data:
-                            data_formatada = data[2].strftime('%d/%m/%Y %H:%M:%S')
-                            print(f"ID Atendimento: {data[0]}, ID Paciente: {data[1]}, "
-                                  f"Data Atendimento: {data_formatada}, CID-10: {data[3]}")
+                            print(f"ID Atendimento: {data[0]}, ID Paciente: {data[1]}, CID-10: {data[3]}, "
+                                  f"Código Manchester: {data[4]}, "
+                                  f"Data Atendimento: {data[2]}")
                     else:
                         print(atendimento.erro)
 
@@ -328,7 +337,7 @@ def submenu_atendimento():
                     atendimento = Atendimento(id_atend=id_atendimento)
                     valor = atendimento.valor_total_tuss()
                     if valor:
-                        print(f"\nValor total: R${valor}")
+                        print(valor)
                     else:
                         print(atendimento.erro)
                     input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
@@ -344,9 +353,14 @@ def submenu_atendimento():
                     atendimento = Atendimento(id_paciente=id_paciente)
                     valor = atendimento.valor_paciente()
                     if valor:
-                        print(f"\nValor total do paciente ID: {atendimento.id_paciente} é: R${valor}")
+                        if valor[0] is None:
+                            valor[0] = 0
+                        print(f"\nPaciente ID: {atendimento.id_paciente}"
+                              f"\nNome: {valor[1]}"
+                              f"\nValor total gasto: R${valor[0]}")
                     else:
                         print(atendimento.erro)
+
                     input("\nPressione ENTER para retornar ao Menu Pesquisar Atendimentos")
                 case 00:
                     break
