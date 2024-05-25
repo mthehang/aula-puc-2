@@ -86,7 +86,6 @@ def menu_paciente():
                     print(paciente.erro)
                 input("\nPressione ENTER para retornar ao Menu Pacientes")
             case 3:
-                # ERRO, precise corridor
                 while True:
                     try:
                         id_paciente = int(input("\nDigite o ID do paciente a ser atualizado: ").strip())
@@ -117,7 +116,7 @@ def menu_paciente():
 
                 while True:
                     novo_sexo = input("Novo sexo (M/F, deixe em branco para não alterar): ").strip().upper()
-                    if novo_sexo == 'M' or 'F':
+                    if novo_sexo in [None, "", 'M', 'F']:
                         break
                     else:
                         print("Digite apenas M ou F.")
@@ -125,10 +124,10 @@ def menu_paciente():
                 while True:
                     nova_data_nasc = input(
                         "Nova data de nascimento (DD/MM/AAAA, deixe em branco para não alterar): ").strip()
-                    if Paciente.validar_data(nova_data_nasc):
+                    if Paciente.validar_data(nova_data_nasc) or nova_data_nasc in [None, ""]:
                         break
                     else:
-                        print("Data inválida. Por favor, insira a nova data no formato AAAA-MM-DD.")
+                        print("\nData inválida. Por favor, insira a nova data no formato AAAA-MM-DD.")
 
                 while True:
                     try:
@@ -140,12 +139,14 @@ def menu_paciente():
 
                 while True:
                     try:
-                        nova_altura = float(
-                            input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(
-                                ',', '.'))
-                        break
+                        nova_altura = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(
+                                                                                             ',', '.')
+                        if nova_altura.isdigit() or nova_altura in [None, ""]:
+                            break
+                        else:
+                            print("\nPor favor, insira uma altura válida.")
                     except ValueError:
-                        print("\nPor favor, insira um peso válido.")
+                        print("\nPor favor, insira uma altura válida.")
 
                 if paciente.atualizar(novo_nome=novo_nome, novo_rg=novo_rg, novo_sexo=novo_sexo,
                                       nova_data_nasc=nova_data_nasc, novo_peso=novo_peso, nova_altura=nova_altura):
