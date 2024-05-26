@@ -372,6 +372,23 @@ def submenu_atendimento():
             print("\nDigite uma opção válida")
 
 
+def menu_servico():
+    print("\nMenu Pacientes")
+    print("1. Cadastrar novo serviço")
+    print("2. Ver todos os serviços")
+    print("3. Atualizar um serviço de atendimento")
+    print("4. Listar serviços de um código TUSS")
+    print("5. Listar serviços em data específica")
+    print("00. Voltar ao menu principal")
+
+    while True:
+        try:
+            opcao = int(input())
+            break
+        except ValueError:
+            pass
+
+
 def main_menu():
     while True:
         print("\nMenu Principal:")

@@ -107,10 +107,10 @@ class Atendimento:
                         ID_atend;
                     """)
                     atendimentos = cursor.fetchall()
-            if atendimentos:
+            if atendimentos and not None:
                 return atendimentos
             else:
-                self.erro = f"\nNão há atendimentos"
+                self.erro = f"\nNenhum atendimento encontrado."
                 return False
         except Error as e:
             self.erro = f"Erro ao listar atendimentos: {e}"
@@ -148,6 +148,19 @@ class Atendimento:
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
+                    cursor.execute("""
+                    SELECT 
+                        CAT 
+                    FROM 
+                        CID10 
+                    WHERE 
+                        CAT = %s;
+                    """, (novo_cid_10,))
+
+                    if cursor.fetchone() is None:
+                        self.erro = "\nCID-10 não encontrado! Por favor, insira um CID-10 válido."
+                        return False
+
                     cursor.execute("""
                     UPDATE 
                         Atendimento 

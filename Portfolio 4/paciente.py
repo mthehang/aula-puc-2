@@ -75,8 +75,8 @@ class Paciente:
             self.erro = f"\n{str(e)}"
             return False
 
-    def atualizar(self, novo_nome=None, novo_rg=None, novo_sexo=None, nova_data_nasc=None, novo_peso=None,
-                  nova_altura=None):
+    def atualizar(self, novo_nome, novo_rg, novo_sexo, nova_data_nasc, novo_peso,
+                  nova_altura):
 
         self.nome = novo_nome or self.nome
         self.rg = novo_rg or self.rg
@@ -130,10 +130,10 @@ class Paciente:
                         ID_paciente;
                     """)
                     resultado = cursor.fetchall()
-                if resultado:
+                if resultado and not None:
                     return resultado
                 else:
-                    self.erro = "Não há pacientes cadastrados"
+                    self.erro = "Nenhum paciente encontrado."
                     return False
             except Error as e:
                 self.erro = f"\n{str(e)}"
