@@ -189,6 +189,7 @@ def menu_atendimento():
         print("2. Ver todos os atendimentos")
         print("3. Atualizar um atendimento de um paciente")
         print("4. Pesquisar atendimentos")
+        print("5. Excluir atendimento")
         print("00. Retornar ao Menu Principal")
 
         while True:
@@ -242,8 +243,7 @@ def menu_atendimento():
                         print("\nDigite um ID válido.")
 
                 atendimento = Atendimento(id_atend=id_atend)
-                dados = atendimento.carregar_dados()
-                if dados:
+                if atendimento.carregar_dados():
                     print(f"\nDados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
                           f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
                 else:
@@ -264,6 +264,37 @@ def menu_atendimento():
 
             case 4:
                 submenu_atendimento()
+
+            case 5:
+                while True:
+                    try:
+                        id_atend = int(input("Digite o ID do atendimento que deseja excluir: "))
+                        break
+                    except ValueError:
+                        print("ID inválido. Digite novamente: ")
+                atendimento = Atendimento(id_atend=id_atend)
+                if atendimento.carregar_dados():
+                    print(f"\nDados Atuais — ID paciente: {atendimento.id_paciente}, CID-10: {atendimento.cid_10}, "
+                          f"Código Manchester: {atendimento.cod_manchester}, Data: {atendimento.data_atend}")
+                    while True:
+                        resposta = input("\nDeseja excluir este atendimento? (S / N): ")
+                        match resposta.upper():
+                            case 'S':
+                                if atendimento.excluir_atendimento():
+                                    print(f"\nAtendimento com ID {atendimento.id_atend} excluído com sucesso.\n")
+                                    break
+                                else:
+                                    print(atendimento.erro)
+                                    break
+                            case 'N':
+                                print("\nOperação cancelada!")
+                                break
+                            case __:
+                                print("Opção inválida. Digite novamente: ")
+                else:
+                    print(atendimento.erro)
+
+                input("Pressione ENTER para retornar ao Menu Pacientes")
 
             case 00:
                 break
@@ -380,6 +411,7 @@ def menu_servico():
         print("3. Atualizar um serviço de atendimento")
         print("4. Listar serviços de um código TUSS")
         print("5. Listar serviços em data específica")
+        print("6. Excluir serviço")
         print("00. Voltar ao menu principal")
         while True:
             try:
@@ -405,6 +437,7 @@ def menu_servico():
                     print("\nServiço cadastrado com sucesso.")
                 else:
                     print(servico.erro)
+
                 input("\nDigite ENTER para voltar ao Menu Serviços")
 
             case 2:
@@ -416,7 +449,8 @@ def menu_servico():
                               f"\nID atendimento: {servicos[1]}"
                               f"\nCódigo TUSS: {servicos[2]}"
                               f"\nData serviço: {servicos[3]}")
-                    input("\nPressione ENTER para retornar ao Menu Serviços")
+
+                input("\nPressione ENTER para retornar ao Menu Serviços")
 
             case 3:
                 while True:
@@ -443,6 +477,7 @@ def menu_servico():
                             print(servico.erro)
                     except ValueError:
                         print("\nID inválido. Por favor, insira um número.")
+
                 input("\nPressione ENTER para voltar ao Menu Serviços")
 
             case 4:
@@ -475,6 +510,8 @@ def menu_servico():
                         print(f"\nErro: {str(e)}")
                         break
 
+                input("\nPressione ENTER para voltar ao Menu Serviços.")
+
             case 5:
                 while True:
                     try:
@@ -482,13 +519,11 @@ def menu_servico():
                         if not Paciente.validar_data(data):
                             print("\nData inválida. Por favor, insira a data no formato DD/MM/AAAA.")
                             continue
-
-                        data_formatada = datetime.strptime(data, "%d/%m/%Y").strftime("%Y-%m-%d")
-                        servico = Servico(data_serv=data_formatada)
+                        servico = Servico(data_serv=datetime.strptime(data, "%d/%m/%Y").strftime("%Y-%m-%d"))
                         resultados = servico.servico_data()
 
                         if resultados:
-                            print("\nServiços prestados na data específica:")
+                            print(f"\nServiços prestados em {data}:")
                             for resultado in resultados:
                                 cod_tuss = resultado[0]
                                 sexo = resultado[1]
@@ -503,11 +538,49 @@ def menu_servico():
                             print(servico.erro)
                         break
                     except ValueError:
-                        print("\nErro ao processar a data. Por favor, insira um valor válido.")
+                        print("\nErro ao processor a data. Por favor, insira um valor válido.")
                     except Exception as e:
                         print(f"\nErro: {str(e)}")
                         break
+
+                input("\nPressione ENTER para voltar ao Menu Serviços.")
+
+            case 6:
+                while True:
+                    try:
+                        id_serv = int(input("Digite ID do serviço a ser excluído: "))
+                        break
+                    except ValueError:
+                        print("ID inválido.")
+                servico = Servico(id_atend_serv=id_serv)
+                servico.carregar_dados()
+                print(f"\nID serviço: {servico.id_atend_serv}"
+                      f"\nID atendimento: {servico.id_atend}"
+                      f"\nCódigo TUSS: {servico.id_tuss}"
+                      f"\nData serviço: {servico.data_serv}")
+
+                while True:
+                    resposta = input("\nDeseja mesmo excluir este serviço? (S / N): ")
+
+                    if resposta.upper() == "S":
+                        if servico.excluir():
+                            print(f"\nServiço com ID {servico.id_atend_serv} excluído com sucesso.")
+                            break
+                        else:
+                            print(servico.erro)
+                            break
+                    elif resposta.upper() == "N":
+                        print("\nOperação cancelada!")
+                        break
+                    else:
+                        print("\nOpção inválida. Digite novamente: ")
+
                 input("Pressione ENTER para voltar ao Menu Serviços.")
+
+            case 00:
+                break
+            case __:
+                print("\nAtendimento inválido. Digite novamente: ")
 
 
 def main_menu():

@@ -298,3 +298,25 @@ class Atendimento:
         except Error as e:
             self.erro = f"\nErro ao acessar dados do banco: {str(e)}"
             return False
+
+    def excluir_atendimento(self):
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT 1 FROM Servico WHERE ID_atend = %s;
+                    """, (self.id_atend,))
+                    if cursor.fetchone() is not None:
+                        self.erro = f"\nNão é possível excluir o atendimento com ID {self.id_atend} pois há serviços relacionados a ele."
+                        return False
+
+                    cursor.execute("""
+                        DELETE FROM Atendimento
+                        WHERE ID_atend = %s;
+                    """, (self.id_atend,))
+                    conexao.commit()
+                    return True
+        except Error as e:
+            self.erro = f"\nErro ao excluir atendimento: {str(e)}"
+            return False
+

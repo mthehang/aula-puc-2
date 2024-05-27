@@ -41,13 +41,17 @@ class Servico:
                         return False
 
                     cursor.execute("""
+                    SET 
+                        datestyle = 'ISO, DMY';
+                    """)
+                    cursor.execute("""
                         INSERT INTO Servico (
                             id_atend, 
                             id_tuss, 
                             data_serv
                         ) VALUES (%s, %s, %s)
                         RETURNING ID_atend_serv;
-                    """, (self.id_atend, self.id_tuss, self.data_serv))  # Certifique-se de que id_tuss é string
+                    """, (self.id_atend, self.id_tuss, self.data_serv))
                     self.id_atend_serv = cursor.fetchone()[0]
 
                     conexao.commit()
@@ -111,7 +115,6 @@ class Servico:
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    # Converter novos valores para int se não forem None e forem digitos
                     novo_id_atend = int(novo_id_atend) if novo_id_atend.isdigit() else self.id_atend
                     novo_id_tuss = int(novo_id_tuss) if novo_id_tuss.isdigit() else self.id_tuss
 
@@ -177,7 +180,7 @@ class Servico:
                         JOIN 
                             TUSS tuss ON serv.ID_tuss = tuss.Cod_TUSS
                         WHERE 
-                            atend.Data_atend::date = %s
+                            serv.Data_serv::Date = %s
                         GROUP BY 
                             tuss.Cod_TUSS, pac.Sexo;
                     """, (self.data_serv,))
@@ -185,4 +188,25 @@ class Servico:
                     return results if results else False
         except Error as e:
             self.erro = f"Erro: {str(e)}"
+            return False
+
+    def excluir(self):
+        try:
+            with bd.obter_conexao() as conexao:
+                with conexao.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT 1 FROM Servico WHERE ID_atend_serv = %s;
+                    """, (self.id_atend_serv,))
+                    if cursor.fetchone() is None:
+                        self.erro = f"Serviço com ID {self.id_atend_serv} não encontrado."
+                        return False
+
+                    cursor.execute("""
+                        DELETE FROM Servico
+                        WHERE ID_atend_serv = %s;
+                    """, (self.id_atend_serv,))
+                    conexao.commit()
+                    return True
+        except Error as e:
+            self.erro = f"Erro ao excluir serviço: {str(e)}"
             return False

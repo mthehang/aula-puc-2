@@ -36,7 +36,7 @@ class BancoDeDados:
                     cursor.execute("""
                         CREATE TABLE IF NOT EXISTS Atendimento (
                         ID_atend SERIAL PRIMARY KEY,
-                        ID_paciente INT REFERENCES Paciente(ID_paciente),
+                        ID_paciente INT REFERENCES Paciente(ID_paciente) ON DELETE RESTRICT,
                         Data_atend TIMESTAMP,
                         CID_10 VARCHAR(10)
                         );""")
@@ -50,7 +50,7 @@ class BancoDeDados:
                     cursor.execute("""
                        CREATE TABLE IF NOT EXISTS Servico (
                        ID_atend_serv SERIAL PRIMARY KEY,
-                       ID_atend INT REFERENCES Atendimento(ID_atend),
+                       ID_atend INT REFERENCES Atendimento(ID_atend) ON DELETE RESTRICT,
                        ID_tuss VARCHAR(8),
                        Data_Serv TIMESTAMP
                        );""")
