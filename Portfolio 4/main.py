@@ -140,7 +140,7 @@ def menu_paciente():
                 while True:
                     try:
                         nova_altura = input("Nova altura (m, deixe em branco para não alterar): ").strip().replace(
-                                                                                             ',', '.')
+                            ',', '.')
                         if nova_altura.isdigit() or nova_altura in [None, ""]:
                             break
                         else:
@@ -373,20 +373,140 @@ def submenu_atendimento():
 
 
 def menu_servico():
-    print("\nMenu Pacientes")
-    print("1. Cadastrar novo serviço")
-    print("2. Ver todos os serviços")
-    print("3. Atualizar um serviço de atendimento")
-    print("4. Listar serviços de um código TUSS")
-    print("5. Listar serviços em data específica")
-    print("00. Voltar ao menu principal")
-
     while True:
-        try:
-            opcao = int(input())
-            break
-        except ValueError:
-            pass
+        print("\nMenu Serviço")
+        print("1. Cadastrar novo serviço")
+        print("2. Ver todos os serviços")
+        print("3. Atualizar um serviço de atendimento")
+        print("4. Listar serviços de um código TUSS")
+        print("5. Listar serviços em data específica")
+        print("00. Voltar ao menu principal")
+        while True:
+            try:
+                opcao = int(input("\nEscolha uma opção: ").strip())
+                break
+            except ValueError:
+                print("\nOpção inválida. Digite novamente: ")
+
+        match opcao:
+            case 1:
+                while True:
+                    try:
+                        id_atend = int(input("Digite ID do atendimento: ").strip())
+                        id_tuss = input("Digite o código TUSS do serviço: ")
+                        break
+                    except ValueError:
+                        print("\nAtendimento inválido. Digite novamente: ")
+
+                servico = Servico(id_atend=id_atend, id_tuss=id_tuss)
+                result = servico.salvar()
+
+                if result:
+                    print("\nServiço cadastrado com sucesso.")
+                else:
+                    print(servico.erro)
+                input("\nDigite ENTER para voltar ao Menu Serviços")
+
+            case 2:
+                servico = Servico()
+                valor = servico.listar_todos()
+                if valor:
+                    for servicos in valor:
+                        print(f"\nID serviço: {servicos[0]}"
+                              f"\nID atendimento: {servicos[1]}"
+                              f"\nCódigo TUSS: {servicos[2]}"
+                              f"\nData serviço: {servicos[3]}")
+                    input("\nPressione ENTER para retornar ao Menu Serviços")
+
+            case 3:
+                while True:
+                    try:
+                        id_atend_serv = int(input("Digite ID de serviço que deseja atualizar: "))
+                        servico = Servico(id_atend_serv=id_atend_serv)
+                        if not servico.carregar_dados():
+                            print(servico.erro)
+                            break
+
+                        print(f"\nID serviço: {servico.id_atend_serv}"
+                              f"\nID atendimento: {servico.id_atend}"
+                              f"\nCódigo TUSS: {servico.id_tuss}"
+                              f"\nData serviço: {servico.data_serv}")
+
+                        novo_id_atend = input(
+                            "\nDigite o novo ID de atendimento (deixe em branco para não alterar): ").strip()
+                        novo_id_tuss = input("Digite o novo Código TUSS (deixe em branco para não alterar): ").strip()
+
+                        if servico.atualizar(novo_id_atend, novo_id_tuss):
+                            print("\nServiço atualizado com sucesso.")
+                            break
+                        else:
+                            print(servico.erro)
+                    except ValueError:
+                        print("\nID inválido. Por favor, insira um número.")
+                input("\nPressione ENTER para voltar ao Menu Serviços")
+
+            case 4:
+                while True:
+                    try:
+                        id_tuss = input("\nDigite o Código TUSS: ").strip()
+                        if not id_tuss:
+                            print("\nCódigo TUSS não pode ser vazio.")
+                            continue
+
+                        servico = Servico(id_tuss=id_tuss)
+                        resultados = servico.servicos_id_tuss()
+
+                        if resultados:
+                            print("\nServiços prestados para o Código TUSS específico:")
+                            for resultado in resultados:
+                                nome_paciente = resultado[0]
+                                data_atendimento = resultado[1]
+                                valor_total = f"{resultado[2]:.2f}".replace(".", ",")
+
+                                print(f"\nPaciente: {nome_paciente}")
+                                print(f"Data do Atendimento: {data_atendimento}")
+                                print(f"Valor Total: R$ {valor_total}")
+                        else:
+                            print(servico.erro)
+                        break
+                    except ValueError:
+                        print("\nErro ao processar o código TUSS. Por favor, insira um valor válido.")
+                    except Exception as e:
+                        print(f"\nErro: {str(e)}")
+                        break
+
+            case 5:
+                while True:
+                    try:
+                        data = input("\nDigite a data que deseja pesquisar serviços (DD/MM/AAAA): ").strip()
+                        if not Paciente.validar_data(data):
+                            print("\nData inválida. Por favor, insira a data no formato DD/MM/AAAA.")
+                            continue
+
+                        data_formatada = datetime.strptime(data, "%d/%m/%Y").strftime("%Y-%m-%d")
+                        servico = Servico(data_serv=data_formatada)
+                        resultados = servico.servico_data()
+
+                        if resultados:
+                            print("\nServiços prestados na data específica:")
+                            for resultado in resultados:
+                                cod_tuss = resultado[0]
+                                sexo = resultado[1]
+                                quantidade = resultado[2]
+                                valor_total = f"{resultado[3]:.2f}".replace(".", ",")
+
+                                print(f"\nCódigo TUSS: {cod_tuss}")
+                                print(f"Sexo: {sexo}")
+                                print(f"Quantidade de Serviços: {quantidade}")
+                                print(f"Valor Total: R$ {valor_total}")
+                        else:
+                            print(servico.erro)
+                        break
+                    except ValueError:
+                        print("\nErro ao processar a data. Por favor, insira um valor válido.")
+                    except Exception as e:
+                        print(f"\nErro: {str(e)}")
+                        break
 
 
 def main_menu():
@@ -410,7 +530,7 @@ def main_menu():
             case 2:
                 menu_atendimento()
             case 3:
-                pass
+                menu_servico()
             case 00:
                 print("Saindo...")
                 break

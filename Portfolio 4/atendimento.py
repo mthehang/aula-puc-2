@@ -100,7 +100,7 @@ class Atendimento:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
                     SELECT 
-                        ID_atend, ID_paciente, CID_10, Cod_manchester, to_char(Data_atend, 'DD/MM/YYYY') 
+                        ID_atend, ID_paciente, CID_10, Cod_manchester, to_char(Data_atend, 'DD/MM/YYYY HH24:MI') 
                     FROM 
                         Atendimento 
                     ORDER BY 
@@ -125,7 +125,7 @@ class Atendimento:
                         ID_paciente, 
                         cid_10, 
                         Cod_manchester, 
-                        to_char(Data_atend, 'DD/MM/YYYY H24:MI') 
+                        to_char(Data_atend, 'DD/MM/YYYY HH24:MI') 
                     FROM 
                         Atendimento
                     WHERE 
@@ -229,7 +229,7 @@ class Atendimento:
                         SUM(tuss.Valor) as Valor_Servico,
                         pac.Nome, 
                         pac.ID_paciente, 
-                        to_char(atend.data_atend, 'DD/MM/YYYY H24:MI') 
+                        to_char(atend.data_atend, 'DD/MM/YYYY HH24:MI') 
                     FROM 
                         Atendimento atend
                     JOIN 

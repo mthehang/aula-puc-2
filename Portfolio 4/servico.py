@@ -17,23 +17,43 @@ class Servico:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
-                    SET 
-                        datestyle = 'ISO, DMY';
-                    """)
+                        SELECT 
+                            ID_atend
+                        FROM 
+                            Atendimento 
+                        WHERE 
+                            ID_atend = %s;
+                    """, (self.id_atend,))
+                    if cursor.fetchone() is None:
+                        self.erro = f"\nID de atendimento {self.id_atend} não existe."
+                        return False
+
                     cursor.execute("""
-                    INSERT 
-                        INTO Servico (
+                        SELECT
+                            Cod_TUSS
+                        FROM
+                            TUSS
+                        WHERE
+                            Cod_TUSS = %s;
+                    """, (self.id_tuss,))
+                    if cursor.fetchone() is None:
+                        self.erro = "\nCódigo TUSS não é válido"
+                        return False
+
+                    cursor.execute("""
+                        INSERT INTO Servico (
                             id_atend, 
                             id_tuss, 
                             data_serv
-                        )
-                    VALUES 
-                        (%s, %s, %s);
-                    """, (self.id_atend, self.id_tuss, self.data_serv))
+                        ) VALUES (%s, %s, %s)
+                        RETURNING ID_atend_serv;
+                    """, (self.id_atend, self.id_tuss, self.data_serv))  # Certifique-se de que id_tuss é string
+                    self.id_atend_serv = cursor.fetchone()[0]
+
                     conexao.commit()
                     return True
         except Error as e:
-            self.erro = "Erro ao salvar serviço:", str(e)
+            self.erro = f"Erro ao salvar serviço: {str(e)}"
             conexao.rollback()
             return False
 
@@ -62,60 +82,49 @@ class Servico:
             self.erro = f"\n{str(e)}"
             return False
 
-    # arrumar defs servico
     def carregar_dados(self):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
                     SELECT 
-                        Nome, 
-                        RG, 
-                        Sexo, 
-                        to_char(Data_nasc, 'DD/MM/YYYY'), 
-                        Peso, 
-                        Altura 
+                        ID_atend,
+                        ID_TUSS,
+                        to_char(Data_serv, 'DD/MM/YYYY HH24:MI')
                     FROM 
-                        Paciente
+                        Servico
                     WHERE 
-                        ID_paciente = %s;
+                        ID_atend_serv = %s;
                     """, (self.id_atend_serv,))
                     dados = cursor.fetchone()
             if dados:
-                self.nome, self.rg, self.sexo, self.data_nasc, self.peso, self.altura = dados
+                self.id_atend, self.id_tuss, self.data_serv = dados
                 return True
             else:
-                self.erro = f"\nPaciente ID {self.id_paciente} não encontrado."
+                self.erro = f"\nServiço ID {self.id_atend_serv} não encontrado."
                 return False
         except Error as e:
             self.erro = f"\n{str(e)}"
             return False
 
-    def atualizar(self, id_atend_serv, id_atend, id_tuss):
-        self.id_atend_serv = id_atend_serv or self.id_atend_serv
-        self.id_atend = id_atend or self.id_atend
-        self.id_tuss = id_tuss or self.id_tuss
-
+    def atualizar(self, novo_id_atend, novo_id_tuss):
         try:
             with bd.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
+                    # Converter novos valores para int se não forem None e forem digitos
+                    novo_id_atend = int(novo_id_atend) if novo_id_atend.isdigit() else self.id_atend
+                    novo_id_tuss = int(novo_id_tuss) if novo_id_tuss.isdigit() else self.id_tuss
+
                     cursor.execute("""
-                    SET 
-                        datestyle = 'ISO, DMY';
-                    """)
-                    cursor.execute("""
-                    UPDATE 
-                        Servico 
-                    SET
-                        ID_atend = %s, 
-                        ID_tuss = %s
-                    WHERE 
-                        ID_atend_serv = %s;
-                    """, self.id_atend_serv)
+                    UPDATE Servico
+                    SET ID_atend = %s, ID_tuss = %s
+                    WHERE ID_atend_serv = %s;
+                    """, (novo_id_atend, novo_id_tuss, self.id_atend_serv))
                     conexao.commit()
-            return True
+                    return True
         except Error as e:
-            self.erro = f"\n{str(e)}"
+            self.erro = str(e)
+            conexao.rollback()
             return False
 
     def servicos_id_tuss(self):
@@ -126,7 +135,7 @@ class Servico:
                         SELECT 
                             pac.Nome, 
                             
-                            to_char(atend.Data_atend, 'DD/MM/YYYY H24:MI'), 
+                            to_char(atend.data_atend, 'DD/MM/YYYY HH24:MI'), 
                             SUM(tuss.Valor) AS Valor_Total
                         FROM 
                             Servico serv
@@ -137,7 +146,7 @@ class Servico:
                         JOIN 
                             TUSS tuss ON serv.id_tuss = tuss.Cod_TUSS
                         WHERE 
-                            truss.Cod_TUSS = %s
+                            tuss.Cod_TUSS = %s
                         GROUP BY 
                             pac.Nome, 
                             atend.Data_atend;
@@ -168,13 +177,12 @@ class Servico:
                         JOIN 
                             TUSS tuss ON serv.ID_tuss = tuss.Cod_TUSS
                         WHERE 
-                            tuss.Cod_TUSS = %s
+                            atend.Data_atend::date = %s
                         GROUP BY 
                             tuss.Cod_TUSS, pac.Sexo;
-                    """, (self.id_tuss,))
+                    """, (self.data_serv,))
                     results = cursor.fetchall()
                     return results if results else False
         except Error as e:
             self.erro = f"Erro: {str(e)}"
             return False
-

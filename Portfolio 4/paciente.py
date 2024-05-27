@@ -55,7 +55,7 @@ class Paciente:
                         Nome, 
                         RG, 
                         Sexo, 
-                        to_char(Data_nasc, 'DD/MM/YYYY'), 
+                        to_char(Data_nasc, 'DD/MM/YYYY HH24:MI'), 
                         Peso, 
                         Altura 
                     FROM 
@@ -121,7 +121,7 @@ class Paciente:
                         Nome, 
                         RG, 
                         Sexo, 
-                        to_char(Data_nasc, 'DD/MM/YYYY'), 
+                        to_char(Data_nasc, 'DD/MM/YYYY HH24:MI'),
                         Peso, 
                         Altura 
                     FROM 
