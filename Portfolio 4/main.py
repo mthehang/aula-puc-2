@@ -507,6 +507,7 @@ def menu_servico():
                     except Exception as e:
                         print(f"\nErro: {str(e)}")
                         break
+                input("Pressione ENTER para voltar ao Menu Serviços.")
 
 
 def main_menu():
