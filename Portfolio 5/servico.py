@@ -234,16 +234,21 @@ class Servico:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
                         SELECT 
-                            ts.Tipo,
-                            COUNT(s.ID) AS Quantidade
+                            s.ID_atend_serv, 
+                            s.ID_atend, 
+                            s.ID_tuss, 
+                            s.Data_serv,
+                            espec.Descr AS Especialidade
                         FROM 
-                            TiposServicos ts
+                            Servico s
+                        JOIN 
+                            TUSS tuss ON s.ID_tuss = tuss.Cod_TUSS
                         LEFT JOIN 
-                            TUSS t ON ts.ID = t.ID_TiposServicos
+                            EspecialidadeTUSS esp_tuss ON tuss.Cod_TUSS = esp_tuss.Cod_Tuss
                         LEFT JOIN 
-                            Servico s ON t.Cod_TUSS = s.ID_tuss
-                        GROUP BY 
-                            ts.Tipo;
+                            Especialidades espec ON esp_tuss.ID_Especialidade = espec.ID
+                        WHERE 
+                            esp_tuss.ID_Especialidade IS NULL;
                     """)
                     resultados = cursor.fetchall()
                     return resultados if resultados else False
@@ -257,24 +262,16 @@ class Servico:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
                         SELECT 
-                            p.Nome,
-                            p.ID,
-                            t.Descr,
-                            COUNT(s.ID) AS Quantidade
+                            ts.Tipo, 
+                            COUNT(serv.ID_atend_serv) AS Quantidade
                         FROM 
-                            Servico s
-                        JOIN 
-                            Paciente p ON s.ID_atend = p.ID
-                        JOIN 
-                            TUSS t ON s.ID_tuss = t.Cod_TUSS
-                        JOIN 
-                            Restricoes r ON t.Cod_TUSS = r.Cod_TUSS
-                        WHERE 
-                            r.PeriodoMeses = 1500
+                            TiposServicos ts
+                        LEFT JOIN 
+                            TUSS tuss ON ts.ID = tuss.ID_TiposServicos
+                        LEFT JOIN 
+                            Servico serv ON tuss.Cod_TUSS = serv.ID_tuss
                         GROUP BY 
-                            p.Nome, p.ID, t.Descr
-                        HAVING 
-                            COUNT(s.ID) > 1;
+                            ts.Tipo;
                     """)
                     resultados = cursor.fetchall()
                     return resultados if resultados else False
@@ -289,13 +286,15 @@ class Servico:
                     cursor.execute("""
                         SELECT 
                             p.Nome,
-                            p.ID,
+                            p.ID_paciente,
                             t.Descr,
-                            COUNT(s.ID) AS Quantidade
+                            COUNT(s.ID_atend_serv) AS Quantidade
                         FROM 
-                            Servicos s
+                            Servico s
                         JOIN 
-                            Paciente p ON s.ID_atend = p.ID
+                            Atendimento atend ON s.ID_atend = atend.ID_atend
+                        JOIN 
+                            Paciente p ON atend.ID_paciente = p.ID_paciente
                         JOIN 
                             TUSS t ON s.ID_tuss = t.Cod_TUSS
                         JOIN 
@@ -303,9 +302,9 @@ class Servico:
                         WHERE 
                             r.PeriodoMeses = 1500
                         GROUP BY 
-                            p.Nome, p.ID, t.Descr
+                            p.Nome, p.ID_paciente, t.Descr
                         HAVING 
-                            COUNT(s.ID) > 1;
+                            COUNT(s.ID_atend_serv) > 1;
                     """)
                     resultados = cursor.fetchall()
                     return resultados if resultados else False
@@ -319,25 +318,25 @@ class Servico:
                 with conexao.cursor() as cursor:
                     cursor.execute("""
                         SELECT 
-                            serv.ID_atend_serv, 
-                            serv.ID_atend, 
-                            serv.ID_tuss, 
-                            serv.Data_Serv,
-                            pac.Nome,
-                            pac.Sexo,
-                            tuss.Descr
+                            s.ID_atend_serv,
+                            s.ID_atend,
+                            s.ID_tuss,
+                            s.Data_serv,
+                            p.Nome,
+                            p.Sexo,
+                            t.Descr
                         FROM 
-                            Servico serv
+                            Servico s
                         JOIN 
-                            Atendimento atend ON serv.ID_atend = atend.ID_atend
+                            Atendimento a ON s.ID_atend = a.ID_atend
                         JOIN 
-                            Paciente pac ON atend.ID_paciente = pac.ID_paciente
+                            Paciente p ON a.ID_paciente = p.ID_paciente
                         JOIN 
-                            TUSS tuss ON serv.ID_tuss = tuss.Cod_TUSS
+                            TUSS t ON s.ID_tuss = t.Cod_TUSS
                         JOIN 
-                            Restricoes res ON tuss.Cod_TUSS = res.COD_TUSS
+                            Restricoes r ON t.Cod_TUSS = r.COD_TUSS
                         WHERE 
-                            pac.Sexo != res.Sexo AND res.Sexo IS NOT NULL;
+                            p.Sexo != r.Sexo AND r.Sexo IS NOT NULL;
                     """)
                     resultados = cursor.fetchall()
                     return resultados if resultados else False
@@ -361,17 +360,18 @@ class Servico:
                             Servico serv
                         JOIN 
                             Medicos med ON serv.Medicos_ID = med.ID
-                        JOIN 
+                        LEFT JOIN 
                             EspecialidadeMedico em ON med.ID = em.ID_Medico
-                        JOIN 
+                        LEFT JOIN 
                             Especialidades esp ON em.ID_Especialidade = esp.ID
-                        JOIN 
+                        LEFT JOIN 
                             EspecialidadeTUSS et ON serv.ID_tuss = et.Cod_Tuss
                         WHERE 
-                            et.ID_Especialidade != esp.ID;
+                            et.ID_Especialidade IS NULL OR et.ID_Especialidade != esp.ID;
                     """)
                     results = cursor.fetchall()
                     return results if results else False
         except Error as e:
             self.erro = f"Erro ao acessar dados do banco: {str(e)}"
             return False
+
