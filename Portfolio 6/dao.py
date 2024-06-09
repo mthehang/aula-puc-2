@@ -144,80 +144,12 @@ class BancoDeDados:
         try:
             with self.obter_conexao() as conexao:
                 with conexao.cursor() as cursor:
-                    # View para Serviços fora da relação de Especialidades X Serviços
                     cursor.execute("""
-                    CREATE OR REPLACE VIEW vw_servicos_fora_especialidade AS
+                    CREATE OR REPLACE VIEW vw_valor_servicos_por_sexo_tipo AS
                     SELECT 
-                        s.ID_atend_serv, 
-                        s.ID_atend, 
-                        s.ID_tuss, 
-                        s.Data_serv,
-                        e.Descr AS Especialidade
-                    FROM 
-                        Servico s
-                    LEFT JOIN 
-                        TUSS t ON s.ID_tuss = t.Cod_TUSS
-                    LEFT JOIN 
-                        EspecialidadeTUSS et ON t.Cod_TUSS = et.Cod_Tuss
-                    LEFT JOIN 
-                        Especialidades e ON et.ID_Especialidade = e.ID
-                    WHERE 
-                        et.ID_Especialidade IS NULL;
-                    """)
-
-                    # View para Quantidade de serviços prestados por tipo de serviço
-                    cursor.execute("""
-                    CREATE OR REPLACE VIEW vw_quantidade_servicos_por_tipo AS
-                    SELECT 
-                        ts.Tipo, 
-                        COUNT(s.ID_atend_serv) AS Quantidade
-                    FROM 
-                        TiposServicos ts
-                    LEFT JOIN 
-                        TUSS t ON ts.ID = t.ID_TiposServicos
-                    LEFT JOIN 
-                        Servico s ON t.Cod_TUSS = s.ID_tuss
-                    GROUP BY 
-                        ts.Tipo;
-                    """)
-
-                    # View para Pacientes que utilizaram serviço mais de uma vez
-                    cursor.execute("""
-                    CREATE OR REPLACE VIEW vw_pacientes_servico_mais_de_uma_vez AS
-                    SELECT 
-                        p.Nome,
-                        p.ID_paciente,
-                        t.Descr,
-                        COUNT(s.ID_atend_serv) AS Quantidade
-                    FROM 
-                        Servico s
-                    JOIN 
-                        Atendimento a ON s.ID_atend = a.ID_atend
-                    JOIN 
-                        Paciente p ON a.ID_paciente = p.ID_paciente
-                    JOIN 
-                        TUSS t ON s.ID_tuss = t.Cod_TUSS
-                    JOIN 
-                        Restricoes r ON t.Cod_TUSS = r.COD_TUSS
-                    WHERE 
-                        r.QtdPeriodo = 1
-                    GROUP BY 
-                        p.Nome, p.ID_paciente, t.Descr
-                    HAVING 
-                        COUNT(s.ID_atend_serv) > 1;
-                    """)
-
-                    # View para Serviços incompatíveis com o sexo do paciente
-                    cursor.execute("""
-                    CREATE OR REPLACE VIEW vw_servicos_incompativeis_sexo AS
-                    SELECT 
-                        s.ID_atend_serv, 
-                        s.ID_atend, 
-                        s.ID_tuss, 
-                        s.Data_serv,
-                        p.Nome,
                         p.Sexo,
-                        t.Descr
+                        ts.Tipo,
+                        SUM(t.Valor) AS Valor_por_Tipo_de_Servico
                     FROM 
                         Servico s
                     JOIN 
@@ -227,33 +159,86 @@ class BancoDeDados:
                     JOIN 
                         TUSS t ON s.ID_tuss = t.Cod_TUSS
                     JOIN 
-                        Restricoes r ON t.Cod_TUSS = r.COD_TUSS
-                    WHERE 
-                        p.Sexo != r.Sexo AND r.Sexo IS NOT NULL;
+                        TiposServicos ts ON t.ID_TiposServicos = ts.ID
+                    GROUP BY 
+                        p.Sexo, ts.Tipo;
                     """)
 
-                    # View para Serviços solicitados por médicos fora da especialidade
                     cursor.execute("""
-                    CREATE OR REPLACE VIEW vw_servicos_fora_especialidade_medico AS
+                    CREATE OR REPLACE VIEW vw_valor_servicos_por_tipo_sexo AS
                     SELECT 
-                        s.ID_atend_serv,
-                        s.ID_atend,
-                        s.ID_tuss,
-                        to_char(s.Data_serv, 'DD/MM/YYYY HH24:MI'),
+                        p.Sexo,
+                        ts.Tipo,
+                        SUM(t.Valor) AS Valor_por_Tipo_de_Servico
+                    FROM 
+                        Servico s
+                    JOIN 
+                        Atendimento a ON s.ID_atend = a.ID_atend
+                    JOIN 
+                        Paciente p ON a.ID_paciente = p.ID_paciente
+                    JOIN 
+                        TUSS t ON s.ID_tuss = t.Cod_TUSS
+                    JOIN 
+                        TiposServicos ts ON t.ID_TiposServicos = ts.ID
+                    WHERE 
+                        ts.Tipo = %s
+                    GROUP BY 
+                        p.Sexo, ts.Tipo;
+                    """)
+
+                    cursor.execute("""
+                    CREATE OR REPLACE VIEW vw_valor_servicos_por_medico_tipo AS
+                    SELECT 
+                        m.ID,
                         m.Nome,
-                        e.Descr
+                        ts.Tipo,
+                        SUM(t.Valor) AS Valor_por_Tipo_de_Servico
                     FROM 
                         Servico s
                     JOIN 
                         Medicos m ON s.Medicos_ID = m.ID
-                    LEFT JOIN 
-                        EspecialidadeMedico em ON m.ID = em.ID_Medico
-                    LEFT JOIN 
-                        Especialidades e ON em.ID_Especialidade = e.ID
-                    LEFT JOIN 
-                        EspecialidadeTUSS et ON s.ID_tuss = et.Cod_Tuss
+                    JOIN 
+                        TUSS t ON s.ID_tuss = t.Cod_TUSS
+                    JOIN 
+                        TiposServicos ts ON t.ID_TiposServicos = ts.ID
+                    GROUP BY 
+                        m.ID, m.Nome, ts.Tipo;
+                    """)
+
+                    cursor.execute("""
+                    CREATE OR REPLACE VIEW vw_valor_servicos_por_medico_tipo_especifico AS
+                    SELECT 
+                        m.ID,
+                        m.Nome,
+                        ts.Tipo,
+                        SUM(t.Valor) AS Valor_por_Tipo_de_Servico
+                    FROM 
+                        Servico s
+                    JOIN 
+                        Medicos m ON s.Medicos_ID = m.ID
+                    JOIN 
+                        TUSS t ON s.ID_tuss = t.Cod_TUSS
+                    JOIN 
+                        TiposServicos ts ON t.ID_TiposServicos = ts.ID
                     WHERE 
-                        et.ID_Especialidade IS NULL OR et.ID_Especialidade != e.ID;
+                        m.Nome = %s
+                    GROUP BY 
+                        m.ID, m.Nome, ts.Tipo;
+                    """)
+
+                    cursor.execute("""
+                    CREATE OR REPLACE VIEW vw_valor_servicos_por_atendimento AS
+                    SELECT 
+                        a.ID_atend,
+                        SUM(t.Valor) AS Valor_Total_Servicos
+                    FROM 
+                        Servico s
+                    JOIN 
+                        Atendimento a ON s.ID_atend = a.ID_atend
+                    JOIN 
+                        TUSS t ON s.ID_tuss = t.Cod_TUSS
+                    GROUP BY 
+                        a.ID_atend;
                     """)
 
                     conexao.commit()

@@ -1,5 +1,6 @@
 from datetime import datetime
 from atendimento import Atendimento
+from exportar_dados import ExportarDados
 from paciente import Paciente
 from servico import Servico
 from medicos import Medico
